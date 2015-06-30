@@ -1,0 +1,48 @@
+﻿@using System;
+@using System.Collections.Generic;
+@using System.Linq;
+
+@using Microsoft.Rest.Generator.Go
+@using Microsoft.Rest.Generator.Go.Templates
+@using Microsoft.Rest.Generator.Utilities
+
+@inherits Microsoft.Rest.Generator.Go.Template<Microsoft.Rest.Generator.Go.MethodGroupTemplateModel>
+@{
+    var imports = Model.Imports;
+    var modelName = GoCodeNamer.CamelCase(Model.Name);
+}
+
+package @Model.PackageName
+@EmptyLine
+@Header("// ")
+
+@EmptyLine
+
+import (
+@foreach (var import in imports)
+{
+    @:"@(import)"
+}
+)
+@EmptyLine
+
+@WrapComment("// ", Model.Documentation)
+type @(Model.ClientName) struct {
+    @(Model.BaseClient)
+}
+
+func New@(Model.ClientName)(subscriptionId string) @(Model.ClientName) {
+    return New@(Model.ClientName)WithBaseUri(DefaultBaseUri, subscriptionId)
+}
+@EmptyLine
+
+func New@(Model.ClientName)WithBaseUri(baseUri string, subscriptionId string) @(Model.ClientName) {
+    return @(Model.ClientName){NewWithBaseUri(baseUri, subscriptionId)}
+}
+@EmptyLine
+
+@foreach (var method in Model.MethodTemplateModels)
+{
+@:@(Include<MethodTemplate, MethodTemplateModel>(new MethodTemplate(), method))
+@:@EmptyLine
+}

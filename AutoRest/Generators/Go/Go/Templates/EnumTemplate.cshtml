@@ -1,0 +1,25 @@
+﻿@using System;
+@using System.Collections.Generic;
+@using System.Linq;
+
+@using Microsoft.Rest.Generator.Go
+@using Microsoft.Rest.Generator.Go.Templates
+@using Microsoft.Rest.Generator.Utilities
+
+@inherits Microsoft.Rest.Generator.Go.Template<Microsoft.Rest.Generator.Go.EnumTemplateModel>
+@{
+    var constants = Model.Constants.Keys.OrderBy(v => v);
+    var modelName = GoCodeNamer.CamelCase(Model.Name);
+}
+
+@WrapComment("// ", Model.Documentation)
+type @Model.Name string
+@EmptyLine
+
+const (
+@foreach (var c in constants)
+{
+    @:@(c) @(Model.Name) = "@(Model.Constants[c])"
+}
+)
+@EmptyLine

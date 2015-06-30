@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" InitialTargets="TurnOffCodeAnalysis">
+  <Import Project="$(SolutionDir)\packages\xunit.runner.visualstudio.2.0.0\build\net20\xunit.runner.visualstudio.props" Condition="Exists('$(SolutionDir)\packages\xunit.runner.visualstudio.2.0.0\build\net20\xunit.runner.visualstudio.props')" />
+  <Import Project="$(SolutionDir)\packages\xunit.core.2.0.0\build\portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS\xunit.core.props" Condition="Exists('$(SolutionDir)\packages\xunit.core.2.0.0\build\portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS\xunit.core.props')" />
+  <PropertyGroup>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\..\</SolutionDir>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <LibraryFxTarget Condition="'$(LibraryFxTarget)' == ''">net45</LibraryFxTarget>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{25E5D2C4-EDB4-451D-8E16-D494ED407C12}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Microsoft.Rest.Generator.Ruby.Tests</RootNamespace>
+    <AssemblyName>AutoRest.Generator.Ruby.Tests</AssemblyName>
+    <RestorePackages>true</RestorePackages>
+    <AutoRestTest>true</AutoRestTest>
+    <NuGetPackageImportStamp>e29c3c7d</NuGetPackageImportStamp>
+  </PropertyGroup>
+  <Import Project="$(SolutionDir)\Tools\AutoRest.Settings.targets" />
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="xunit.abstractions">
+      <HintPath>$(SolutionDir)\packages\xunit.abstractions.2.0.0\lib\net35\xunit.abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="xunit.assert">
+      <HintPath>$(SolutionDir)\packages\xunit.assert.2.0.0\lib\portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS\xunit.assert.dll</HintPath>
+    </Reference>
+    <Reference Include="xunit.core">
+      <HintPath>$(SolutionDir)\packages\xunit.extensibility.core.2.0.0\lib\portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS\xunit.core.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\AutoRest.Core\AutoRest.Core.csproj">
+      <Project>{c876085f-9dc3-41f0-b7b4-17022cd84684}</Project>
+      <Name>AutoRest.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\CSharp\CSharp.Tests\AutoRest.Generator.CSharp.Tests.csproj">
+      <Project>{84211169-9441-44f9-b626-10bf75ff25a6}</Project>
+      <Name>AutoRest.Generator.CSharp.Tests</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Ruby\Ruby\AutoRest.Generator.Ruby.csproj">
+      <Project>{a7780698-3072-486e-a105-81eddf552598}</Project>
+      <Name>AutoRest.Generator.Ruby</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+    <None Include="Swagger\swagger-allOf-circular.json" />
+    <None Include="Swagger\swagger-allOf.json" />
+    <None Include="Swagger\swagger-data-types.json" />
+    <None Include="Swagger\swagger-external-def.json" />
+    <None Include="Swagger\swagger-external-ref-no-definitions.json" />
+    <None Include="Swagger\swagger-external-ref.json" />
+    <None Include="Swagger\swagger-global-responses.json" />
+    <None Include="Swagger\swagger-multiple-response-schemas.json" />
+    <None Include="Swagger\swagger-no-content.json" />
+    <None Include="Swagger\swagger-optional-params.json" />
+    <None Include="Swagger\swagger-polymorphism.json" />
+    <None Include="Swagger\swagger-recursive-type.json" />
+    <None Include="Swagger\swagger-simple-spec.json" />
+    <None Include="Swagger\swagger-streaming.json" />
+    <None Include="Swagger\swagger.2.0.example.v2.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Commands.txt" />
+  </ItemGroup>
+</Project>

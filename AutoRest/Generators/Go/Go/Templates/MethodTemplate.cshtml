@@ -1,0 +1,114 @@
+﻿@using System;
+@using System.Collections;
+@using System.Collections.Generic;
+@using System.Linq;
+@using System.Net;
+@using System.Text;
+
+@using Microsoft.Rest.Generator.ClientModel
+@using Microsoft.Rest.Generator.Go
+@inherits Microsoft.Rest.Generator.Go.Template<Microsoft.Rest.Generator.Go.MethodTemplateModel>
+
+@{
+    StringBuilder sb = new StringBuilder();
+    foreach (var parameter in Model.LocalParameters)
+    {
+        if (!string.IsNullOrEmpty(parameter.Documentation))
+        {
+            sb.Append(parameter.Name);
+            sb.Append(" is ");
+            sb.Append(parameter.Documentation.ToSentence());
+            sb.Append(" ");
+        }
+    }
+
+    List<string> pd = Model.PrepareDecorators;
+    pd.Insert(0, "req");
+    List<string> rd = Model.RespondDecorators;
+    rd.Insert(0, "resp");
+    
+    // TODO (gosdk): Detect and better handle long running operations
+}
+
+@WrapComment("// ", Model.ScopedName + " " + Model.Documentation.ToSentence())
+@if (Model.LocalParameters.Count() > 0)
+{
+@://
+@WrapComment("// ", sb.ToString())
+}
+
+func (client @(Model.Owner)) @(Model.MethodSignature) (@Model.ReturnSignature) {
+    req, err := client.@(Model.RequestMethodName)(@(Model.HelperInvocationParameters))
+    if err != nil {
+        return result, @(Model.AutorestError("creating"))
+    }
+
+    @EmptyLine
+    req, err = autorest.Prepare(
+        @(pd.EmitAsArguments())
+    if err != nil {
+        return result, @(Model.AutorestError("preparing"))
+    }
+
+    @EmptyLine
+    resp, err := autorest.SendWithSender(client, req)
+@if (Model.Responses.ContainsKey(HttpStatusCode.Accepted))
+{
+    @:if err == nil {
+        @:err = client.ShouldPoll(resp)
+        @:if err == nil {
+            @:resp, err = client.PollAsNeeded(resp)
+        @:}
+    @:}
+}
+
+    @EmptyLine
+    if err == nil {
+        err = autorest.Respond(
+            @(rd.EmitAsArguments())
+        if err != nil {
+            ae = @(Model.AutorestError("responding to"))
+        }
+    } else {
+        ae = @(Model.AutorestError("sending"))
+    }
+
+    @EmptyLine
+    autorest.Respond(resp,
+        autorest.ByClosing())
+@if (Model.HasReturnValue) {
+    @:result.Response = autorest.Response{Response: resp}
+} else {
+    @:result.Response = resp
+}
+
+    @EmptyLine
+    return
+}
+
+@EmptyLine
+// Create the @(Model.ScopedName) request.
+func (client @(Model.Owner)) @(Model.RequestMethodName)(@(Model.MethodParametersSignature)) (*http.Request, error) {
+@if (Model.PathParameters.Count() > 0)
+{
+    @:@(Model.PathMap)
+    @:@EmptyLine
+}
+@if (Model.QueryParameters.Count() > 0)
+{
+    @:@(Model.QueryMap)
+    @:@EmptyLine
+}
+    return autorest.DecoratePreparer(
+        @(Model.RequestDecorators.EmitAsArguments()).Prepare(&http.Request{})
+}
+
+@EmptyLine
+// Create a Preparer by which to prepare the @(Model.ScopedName) request.
+func (client @(Model.Owner)) @(Model.PreparerMethodName)() autorest.Preparer {
+    return autorest.CreatePreparer(
+        autorest.AsJSON(),
+        @(Model.HTTPMethodDecorator),
+        autorest.WithBaseURL(client.BaseUri),
+        autorest.WithPath("@(Model.Url)"))
+}
