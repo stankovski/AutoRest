@@ -1,7 +1,7 @@
 
 AUTOREST    = "../../../binaries/net45/AutoRest.exe"
 INPUT_PATH  = "../../../../azure-rest-api-specs/arm-%s/%s/swagger/%s.json"
-NAMESPACE   = "github.com/azure/azure-sdk-for-go/arm/%s"
+NAMESPACE   = "github.com/Azure/azure-sdk-for-go/arm/%s"
 SDK_PATH    = "../../../../go/src/github.com/azure/azure-sdk-for-go/arm/"
 OUTPUT_PATH = "#{SDK_PATH}%s"
 

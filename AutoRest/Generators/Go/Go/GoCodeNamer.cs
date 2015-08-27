@@ -303,11 +303,11 @@ namespace Microsoft.Rest.Generator.Go
                 }
                 else if (primaryType == PrimaryType.Date)
                 {
-                    return new PackageType { Import = "github.com/azure/go-autorest/autorest/date", Member = "Date" };
+                    return new PackageType { Import = "github.com/Azure/go-autorest/autorest/date", Member = "Date" };
                 }
                 else if (primaryType == PrimaryType.DateTime)
                 {
-                    return new PackageType { Import = "github.com/azure/go-autorest/autorest/date", Member = "Time" };
+                    return new PackageType { Import = "github.com/Azure/go-autorest/autorest/date", Member = "Time" };
                 }
                 else if (primaryType == PrimaryType.Double)
                 {
