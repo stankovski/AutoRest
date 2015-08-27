@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 
 using Microsoft.Rest.Generator.ClientModel;
 using Microsoft.Rest.Generator.Go;
@@ -14,6 +15,70 @@ namespace Microsoft.Rest.Generator.Go
     public class GoCodeNamer : CodeNamer
     {
         private readonly HashSet<IType> _normalizedTypes;
+
+        public static readonly Dictionary<HttpStatusCode, string> StatusCodeToGoString;
+
+        static GoCodeNamer()
+        {
+            // Create a map from HttpStatusCode to the appropriate Go http.StatusXxxxx string.
+            // -- Go does not have constants for the full HttpStatusCode enumeration; this set taken from http://golang.org/pkg/net/http/
+            StatusCodeToGoString = new Dictionary<HttpStatusCode, string>();
+            foreach (var sc in new HttpStatusCode[]{
+                HttpStatusCode.Continue,
+                HttpStatusCode.SwitchingProtocols,
+                
+                HttpStatusCode.OK,
+                HttpStatusCode.Created,
+                HttpStatusCode.Accepted,
+                HttpStatusCode.NonAuthoritativeInformation,
+                HttpStatusCode.NoContent,
+                HttpStatusCode.ResetContent,
+                HttpStatusCode.PartialContent,
+                
+                HttpStatusCode.MultipleChoices,
+                HttpStatusCode.MovedPermanently,
+                HttpStatusCode.Found,
+                HttpStatusCode.SeeOther,
+                HttpStatusCode.NotModified,
+                HttpStatusCode.UseProxy,
+                HttpStatusCode.TemporaryRedirect,
+                
+                HttpStatusCode.BadRequest,
+                HttpStatusCode.Unauthorized,
+                HttpStatusCode.PaymentRequired,
+                HttpStatusCode.Forbidden,
+                HttpStatusCode.NotFound,
+                HttpStatusCode.MethodNotAllowed,
+                HttpStatusCode.NotAcceptable,
+                HttpStatusCode.ProxyAuthenticationRequired,
+                HttpStatusCode.RequestTimeout,
+                HttpStatusCode.Conflict,
+                HttpStatusCode.Gone,
+                HttpStatusCode.LengthRequired,
+                HttpStatusCode.PreconditionFailed,
+                HttpStatusCode.RequestEntityTooLarge,
+                HttpStatusCode.RequestUriTooLong,
+                HttpStatusCode.UnsupportedMediaType,
+                HttpStatusCode.RequestedRangeNotSatisfiable,
+                HttpStatusCode.ExpectationFailed,
+                
+                HttpStatusCode.InternalServerError,
+                HttpStatusCode.NotImplemented,
+                HttpStatusCode.BadGateway,
+                HttpStatusCode.ServiceUnavailable,
+                HttpStatusCode.GatewayTimeout,
+                HttpStatusCode.HttpVersionNotSupported
+            })
+            {
+                StatusCodeToGoString.Add(sc, string.Format("http.Status{0}", sc));
+            }
+
+            // Go names some constants slightly differently than the HttpStatusCode enumeration -- correct those
+            StatusCodeToGoString[HttpStatusCode.NonAuthoritativeInformation] = "http.StatusNonAuthoritativeInfo";
+            StatusCodeToGoString[HttpStatusCode.ProxyAuthenticationRequired] = "http.StatusProxyAuthRequired";
+            StatusCodeToGoString[HttpStatusCode.RequestUriTooLong] = "http.StatusRequestURITooLong";
+            StatusCodeToGoString[HttpStatusCode.HttpVersionNotSupported] = "http.StatusHTTPVersionNotSupported";
+        }
 
         /// <summary>
         /// Initializes a new instance of GoCodeNamingFramework.
@@ -128,7 +193,7 @@ namespace Microsoft.Rest.Generator.Go
             }
         }
 
-        protected override IType NormalizeType(IType type)
+        public override IType NormalizeType(IType type)
         {
             if (type == null)
             {

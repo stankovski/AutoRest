@@ -24,6 +24,9 @@
 
     List<string> pd = Model.PrepareDecorators;
     pd.Insert(0, "req");
+    List<string> sd = Model.SendDecorators;
+    sd.Insert(0, "req");
+    sd.Insert(0, "client");
     List<string> rd = Model.RespondDecorators;
     rd.Insert(0, "resp");
     
@@ -51,11 +54,12 @@ func (client @(Model.Owner)) @(Model.MethodSignature) (@Model.ReturnSignature) {
     }
 
     @EmptyLine
-    resp, err := autorest.SendWithSender(client, req)
+    resp, err := autorest.SendWithSender(
+        @(sd.EmitAsArguments())
 @if (Model.Responses.ContainsKey(HttpStatusCode.Accepted))
 {
     @:if err == nil {
-        @:err = client.ShouldPoll(resp)
+        @:err = client.IsPollingAllowed(resp)
         @:if err == nil {
             @:resp, err = client.PollAsNeeded(resp)
         @:}

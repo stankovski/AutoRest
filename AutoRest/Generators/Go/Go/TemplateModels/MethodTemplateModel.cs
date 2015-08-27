@@ -185,6 +185,21 @@ namespace Microsoft.Rest.Generator.Go
             }
         }
 
+        public List<string> SendDecorators
+        {
+            get
+            {
+                var decorators = new List<string>();
+                var codes = new List<string>();
+                foreach (var sc in Responses.Keys)
+                {
+                    codes.Add(GoCodeNamer.StatusCodeToGoString[sc]);
+                }
+                decorators.Add(string.Format("autorest.DoErrorUnlessStatusCode({0})", string.Join(",", codes.ToArray())));
+                return decorators;
+            }
+        }
+
         public List<string> RequestDecorators
         {
             get

@@ -74,6 +74,9 @@ using Microsoft.Rest.Generator.Go
 
     List<string> pd = Model.PrepareDecorators;
     pd.Insert(0, "req");
+    List<string> sd = Model.SendDecorators;
+    sd.Insert(0, "req");
+    sd.Insert(0, "client");
     List<string> rd = Model.RespondDecorators;
     rd.Insert(0, "resp");
     
@@ -83,13 +86,13 @@ using Microsoft.Rest.Generator.Go
 #line hidden
 
             WriteLiteral("\r\n\r\n");
-#line 33 "MethodTemplate.cshtml"
+#line 36 "MethodTemplate.cshtml"
 Write(WrapComment("// ", Model.ScopedName + " " + Model.Documentation.ToSentence()));
 
 #line default
 #line hidden
             WriteLiteral("\r\n");
-#line 34 "MethodTemplate.cshtml"
+#line 37 "MethodTemplate.cshtml"
  if (Model.LocalParameters.Count() > 0)
 {
 
@@ -97,17 +100,17 @@ Write(WrapComment("// ", Model.ScopedName + " " + Model.Documentation.ToSentence
 #line hidden
 
             WriteLiteral("//\r\n");
-#line 37 "MethodTemplate.cshtml"
+#line 40 "MethodTemplate.cshtml"
 
 #line default
 #line hidden
 
-#line 37 "MethodTemplate.cshtml"
+#line 40 "MethodTemplate.cshtml"
 Write(WrapComment("// ", sb.ToString()));
 
 #line default
 #line hidden
-#line 37 "MethodTemplate.cshtml"
+#line 40 "MethodTemplate.cshtml"
                                   
 }
 
@@ -115,170 +118,176 @@ Write(WrapComment("// ", sb.ToString()));
 #line hidden
 
             WriteLiteral("\r\nfunc (client ");
-#line 40 "MethodTemplate.cshtml"
+#line 43 "MethodTemplate.cshtml"
          Write(Model.Owner);
 
 #line default
 #line hidden
             WriteLiteral(") ");
-#line 40 "MethodTemplate.cshtml"
+#line 43 "MethodTemplate.cshtml"
                          Write(Model.MethodSignature);
 
 #line default
 #line hidden
             WriteLiteral(" (");
-#line 40 "MethodTemplate.cshtml"
+#line 43 "MethodTemplate.cshtml"
                                                   Write(Model.ReturnSignature);
 
 #line default
 #line hidden
             WriteLiteral(") {\r\n    req, err := client.");
-#line 41 "MethodTemplate.cshtml"
+#line 44 "MethodTemplate.cshtml"
                    Write(Model.RequestMethodName);
 
 #line default
 #line hidden
             WriteLiteral("(");
-#line 41 "MethodTemplate.cshtml"
+#line 44 "MethodTemplate.cshtml"
                                               Write(Model.HelperInvocationParameters);
 
 #line default
 #line hidden
             WriteLiteral(")\r\n    if err != nil {\r\n        return result, ");
-#line 43 "MethodTemplate.cshtml"
+#line 46 "MethodTemplate.cshtml"
                    Write(Model.AutorestError("creating"));
 
 #line default
 #line hidden
             WriteLiteral("\r\n    }\r\n\r\n    ");
-#line 46 "MethodTemplate.cshtml"
+#line 49 "MethodTemplate.cshtml"
 Write(EmptyLine);
 
 #line default
 #line hidden
             WriteLiteral("\r\n    req, err = autorest.Prepare(\r\n        ");
-#line 48 "MethodTemplate.cshtml"
+#line 51 "MethodTemplate.cshtml"
     Write(pd.EmitAsArguments());
 
 #line default
 #line hidden
             WriteLiteral("\r\n    if err != nil {\r\n        return result, ");
-#line 50 "MethodTemplate.cshtml"
+#line 53 "MethodTemplate.cshtml"
                    Write(Model.AutorestError("preparing"));
 
 #line default
 #line hidden
             WriteLiteral("\r\n    }\r\n\r\n    ");
-#line 53 "MethodTemplate.cshtml"
+#line 56 "MethodTemplate.cshtml"
 Write(EmptyLine);
 
 #line default
 #line hidden
-            WriteLiteral("\r\n    resp, err := autorest.SendWithSender(client, req)\r\n");
-#line 55 "MethodTemplate.cshtml"
+            WriteLiteral("\r\n    resp, err := autorest.SendWithSender(\r\n        ");
+#line 58 "MethodTemplate.cshtml"
+    Write(sd.EmitAsArguments());
+
+#line default
+#line hidden
+            WriteLiteral("\r\n");
+#line 59 "MethodTemplate.cshtml"
  if (Model.Responses.ContainsKey(HttpStatusCode.Accepted))
 {
 
 #line default
 #line hidden
 
-            WriteLiteral("    if err == nil {\r\n        err = client.ShouldPoll(resp)\r\n        if err == nil" +
-" {\r\n            resp, err = client.PollAsNeeded(resp)\r\n        }\r\n    }\r\n");
-#line 63 "MethodTemplate.cshtml"
+            WriteLiteral("    if err == nil {\r\n        err = client.IsPollingAllowed(resp)\r\n        if err " +
+"== nil {\r\n            resp, err = client.PollAsNeeded(resp)\r\n        }\r\n    }\r\n");
+#line 67 "MethodTemplate.cshtml"
 }
 
 #line default
 #line hidden
 
             WriteLiteral("\r\n    ");
-#line 65 "MethodTemplate.cshtml"
+#line 69 "MethodTemplate.cshtml"
 Write(EmptyLine);
 
 #line default
 #line hidden
             WriteLiteral("\r\n    if err == nil {\r\n        err = autorest.Respond(\r\n            ");
-#line 68 "MethodTemplate.cshtml"
+#line 72 "MethodTemplate.cshtml"
         Write(rd.EmitAsArguments());
 
 #line default
 #line hidden
             WriteLiteral("\r\n        if err != nil {\r\n            ae = ");
-#line 70 "MethodTemplate.cshtml"
+#line 74 "MethodTemplate.cshtml"
              Write(Model.AutorestError("responding to"));
 
 #line default
 #line hidden
             WriteLiteral("\r\n        }\r\n    } else {\r\n        ae = ");
-#line 73 "MethodTemplate.cshtml"
+#line 77 "MethodTemplate.cshtml"
          Write(Model.AutorestError("sending"));
 
 #line default
 #line hidden
             WriteLiteral("\r\n    }\r\n\r\n    ");
-#line 76 "MethodTemplate.cshtml"
+#line 80 "MethodTemplate.cshtml"
 Write(EmptyLine);
 
 #line default
 #line hidden
             WriteLiteral("\r\n    autorest.Respond(resp,\r\n        autorest.ByClosing())\r\n");
-#line 79 "MethodTemplate.cshtml"
+#line 83 "MethodTemplate.cshtml"
  if (Model.HasReturnValue) {
 
 #line default
 #line hidden
 
             WriteLiteral("    result.Response = autorest.Response{Response: resp}\r\n");
-#line 81 "MethodTemplate.cshtml"
+#line 85 "MethodTemplate.cshtml"
 } else {
 
 #line default
 #line hidden
 
             WriteLiteral("    result.Response = resp\r\n");
-#line 83 "MethodTemplate.cshtml"
+#line 87 "MethodTemplate.cshtml"
 }
 
 #line default
 #line hidden
 
             WriteLiteral("\r\n    ");
-#line 85 "MethodTemplate.cshtml"
-Write(EmptyLine);
-
-#line default
-#line hidden
-            WriteLiteral("\r\n    return\r\n}\r\n\r\n");
 #line 89 "MethodTemplate.cshtml"
 Write(EmptyLine);
 
 #line default
 #line hidden
+            WriteLiteral("\r\n    return\r\n}\r\n\r\n");
+#line 93 "MethodTemplate.cshtml"
+Write(EmptyLine);
+
+#line default
+#line hidden
             WriteLiteral("\r\n// Create the ");
-#line 90 "MethodTemplate.cshtml"
+#line 94 "MethodTemplate.cshtml"
           Write(Model.ScopedName);
 
 #line default
 #line hidden
             WriteLiteral(" request.\r\nfunc (client ");
-#line 91 "MethodTemplate.cshtml"
+#line 95 "MethodTemplate.cshtml"
          Write(Model.Owner);
 
 #line default
 #line hidden
             WriteLiteral(") ");
-#line 91 "MethodTemplate.cshtml"
+#line 95 "MethodTemplate.cshtml"
                          Write(Model.RequestMethodName);
 
 #line default
 #line hidden
             WriteLiteral("(");
-#line 91 "MethodTemplate.cshtml"
+#line 95 "MethodTemplate.cshtml"
                                                     Write(Model.MethodParametersSignature);
 
 #line default
 #line hidden
             WriteLiteral(") (*http.Request, error) {\r\n");
-#line 92 "MethodTemplate.cshtml"
+#line 96 "MethodTemplate.cshtml"
  if (Model.PathParameters.Count() > 0)
 {
 
@@ -286,25 +295,25 @@ Write(EmptyLine);
 #line hidden
 
             WriteLiteral("    ");
-#line 94 "MethodTemplate.cshtml"
+#line 98 "MethodTemplate.cshtml"
   Write(Model.PathMap);
 
 #line default
 #line hidden
             WriteLiteral("\r\n    ");
-#line 95 "MethodTemplate.cshtml"
+#line 99 "MethodTemplate.cshtml"
  Write(EmptyLine);
 
 #line default
 #line hidden
             WriteLiteral("\r\n");
-#line 96 "MethodTemplate.cshtml"
+#line 100 "MethodTemplate.cshtml"
 }
 
 #line default
 #line hidden
 
-#line 97 "MethodTemplate.cshtml"
+#line 101 "MethodTemplate.cshtml"
  if (Model.QueryParameters.Count() > 0)
 {
 
@@ -312,63 +321,63 @@ Write(EmptyLine);
 #line hidden
 
             WriteLiteral("    ");
-#line 99 "MethodTemplate.cshtml"
+#line 103 "MethodTemplate.cshtml"
   Write(Model.QueryMap);
 
 #line default
 #line hidden
             WriteLiteral("\r\n    ");
-#line 100 "MethodTemplate.cshtml"
+#line 104 "MethodTemplate.cshtml"
  Write(EmptyLine);
 
 #line default
 #line hidden
             WriteLiteral("\r\n");
-#line 101 "MethodTemplate.cshtml"
+#line 105 "MethodTemplate.cshtml"
 }
 
 #line default
 #line hidden
 
             WriteLiteral("    return autorest.DecoratePreparer(\r\n        ");
-#line 103 "MethodTemplate.cshtml"
+#line 107 "MethodTemplate.cshtml"
     Write(Model.RequestDecorators.EmitAsArguments());
 
 #line default
 #line hidden
             WriteLiteral(".Prepare(&http.Request{})\r\n}\r\n\r\n");
-#line 106 "MethodTemplate.cshtml"
+#line 110 "MethodTemplate.cshtml"
 Write(EmptyLine);
 
 #line default
 #line hidden
             WriteLiteral("\r\n// Create a Preparer by which to prepare the ");
-#line 107 "MethodTemplate.cshtml"
+#line 111 "MethodTemplate.cshtml"
                                          Write(Model.ScopedName);
 
 #line default
 #line hidden
             WriteLiteral(" request.\r\nfunc (client ");
-#line 108 "MethodTemplate.cshtml"
+#line 112 "MethodTemplate.cshtml"
          Write(Model.Owner);
 
 #line default
 #line hidden
             WriteLiteral(") ");
-#line 108 "MethodTemplate.cshtml"
+#line 112 "MethodTemplate.cshtml"
                          Write(Model.PreparerMethodName);
 
 #line default
 #line hidden
             WriteLiteral("() autorest.Preparer {\r\n    return autorest.CreatePreparer(\r\n        autorest.AsJ" +
 "SON(),\r\n        ");
-#line 111 "MethodTemplate.cshtml"
+#line 115 "MethodTemplate.cshtml"
     Write(Model.HTTPMethodDecorator);
 
 #line default
 #line hidden
             WriteLiteral(",\r\n        autorest.WithBaseURL(client.BaseUri),\r\n        autorest.WithPath(\"");
-#line 113 "MethodTemplate.cshtml"
+#line 117 "MethodTemplate.cshtml"
                        Write(Model.Url);
 
 #line default
