@@ -106,7 +106,7 @@ namespace Microsoft.Rest.Generator.Go
             {
                 // Create an ordered union of the imports each model requires
                 var imports = new HashSet<string>();
-                imports.Add("github.com/azure/go-autorest/autorest");
+                imports.Add("github.com/Azure/go-autorest/autorest");
                 ModelTypes
                     .ForEach(mt =>
                     {

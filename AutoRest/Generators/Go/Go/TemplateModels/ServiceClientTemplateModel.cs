@@ -12,7 +12,7 @@ namespace Microsoft.Rest.Generator.Go
 {
     public class ServiceClientTemplateModel : ServiceClient
     {
-        public static readonly List<string> AutorestImports = new List<string> { "github.com/azure/go-autorest/autorest" };
+        public static readonly List<string> AutorestImports = new List<string> { "github.com/Azure/go-autorest/autorest" };
         public static readonly List<string> StandardImports = new List<string> { "net/http" };
 
         public readonly string ClientName;
