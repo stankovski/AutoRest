@@ -22,5 +22,18 @@
         }
       }
     }
+  },
+  "definitions": {
+    "Greeting": {
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "Greeting text"
+        }
+      },
+      "required": [
+        "text"
+      ]
+    },
   }
 }
