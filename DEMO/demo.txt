@@ -1,0 +1,7 @@
+Demo Prep
+1. Run Developer Prompt
+2. dnvm install latest
+   dnu use 1.0.0-beta7
+   dnu restore
+   dnx run
+

@@ -1,5 +1,5 @@
 using System;
-using MyNamespace;
+using HelloWorld;
 
 public class Program
 {
