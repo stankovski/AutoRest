@@ -1,0 +1,225 @@
+{
+  "locked": false,
+  "version": 1,
+  "targets": {
+    "DNX,Version=v4.5.1": {
+      "Microsoft.IdentityModel.Clients.ActiveDirectory/3.5.207081303-alpha": {
+        "compile": {
+          "lib/net45/Microsoft.IdentityModel.Clients.ActiveDirectory.dll": {},
+          "lib/net45/Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Microsoft.IdentityModel.Clients.ActiveDirectory.dll": {},
+          "lib/net45/Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll": {}
+        }
+      },
+      "Microsoft.Rest.ClientRuntime/1.1.1": {
+        "dependencies": {
+          "Newtonsoft.Json": "6.0.4"
+        },
+        "frameworkAssemblies": [
+          "System.Net.Http"
+        ],
+        "compile": {
+          "lib/net45/Microsoft.Rest.ClientRuntime.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Microsoft.Rest.ClientRuntime.dll": {}
+        }
+      },
+      "Microsoft.Rest.ClientRuntime.Azure/1.0.18-preview": {
+        "dependencies": {
+          "Microsoft.IdentityModel.Clients.ActiveDirectory": "3.5.207081303-alpha",
+          "Microsoft.Rest.ClientRuntime": "[1.1.1, 2.0)"
+        },
+        "frameworkAssemblies": [
+          "System.Runtime.Serialization"
+        ],
+        "compile": {
+          "lib/net45/Microsoft.Rest.ClientRuntime.Azure.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Microsoft.Rest.ClientRuntime.Azure.dll": {}
+        }
+      },
+      "Newtonsoft.Json/6.0.4": {
+        "compile": {
+          "lib/net45/Newtonsoft.Json.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Newtonsoft.Json.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Microsoft.IdentityModel.Clients.ActiveDirectory/3.5.207081303-alpha": {
+      "sha512": "ag/BfHD5ADksunP1OuR4y4Kk4lemKgw7nkJoxaAfEWT8ik2n4lOyqmBms4rpF/+fIkjSizlI6JKkl7MT+Iqpqw==",
+      "files": [
+        "lib/dnxcore50/Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
+        "lib/dnxcore50/Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll",
+        "lib/dnxcore50/Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.XML",
+        "lib/dnxcore50/Microsoft.IdentityModel.Clients.ActiveDirectory.XML",
+        "lib/MonoAndroid10/Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
+        "lib/MonoAndroid10/Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll",
+        "lib/MonoAndroid10/Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.XML",
+        "lib/MonoAndroid10/Microsoft.IdentityModel.Clients.ActiveDirectory.XML",
+        "lib/net45/Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
+        "lib/net45/Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll",
+        "lib/net45/Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.XML",
+        "lib/net45/Microsoft.IdentityModel.Clients.ActiveDirectory.XML",
+        "lib/netcore45/Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
+        "lib/netcore45/Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll",
+        "lib/netcore45/Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.XML",
+        "lib/netcore45/Microsoft.IdentityModel.Clients.ActiveDirectory.XML",
+        "lib/portable-net45+win+wpa81+wp80/Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
+        "lib/portable-net45+win+wpa81+wp80/Microsoft.IdentityModel.Clients.ActiveDirectory.XML",
+        "lib/wpa/Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
+        "lib/wpa/Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll",
+        "lib/wpa/Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.XML",
+        "lib/wpa/Microsoft.IdentityModel.Clients.ActiveDirectory.XML",
+        "lib/Xamarin.iOS10/Microsoft.IdentityModel.Clients.ActiveDirectory.dll",
+        "lib/Xamarin.iOS10/Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll",
+        "lib/Xamarin.iOS10/Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.XML",
+        "lib/Xamarin.iOS10/Microsoft.IdentityModel.Clients.ActiveDirectory.XML",
+        "Microsoft.IdentityModel.Clients.ActiveDirectory.3.5.207081303-alpha.nupkg",
+        "Microsoft.IdentityModel.Clients.ActiveDirectory.3.5.207081303-alpha.nupkg.sha512",
+        "Microsoft.IdentityModel.Clients.ActiveDirectory.nuspec"
+      ]
+    },
+    "Microsoft.Rest.ClientRuntime/1.1.1": {
+      "sha512": "UIPgIQyXMkLCnwg8XvYXrkCWq9u9MB9qoDI461QGQMxDYGgfaID9qVNQ9YacVn5SJS1Y9eo9Z4qUsYz4ILjgiA==",
+      "files": [
+        "lib/net45/Microsoft.Rest.ClientRuntime.dll",
+        "lib/net45/Microsoft.Rest.ClientRuntime.dll.mdb",
+        "lib/net45/Microsoft.Rest.ClientRuntime.xml",
+        "lib/portable-net45+win8+wpa81/Microsoft.Rest.ClientRuntime.dll",
+        "lib/portable-net45+win8+wpa81/Microsoft.Rest.ClientRuntime.dll.mdb",
+        "lib/portable-net45+win8+wpa81/Microsoft.Rest.ClientRuntime.xml",
+        "Microsoft.Rest.ClientRuntime.1.1.1.nupkg",
+        "Microsoft.Rest.ClientRuntime.1.1.1.nupkg.sha512",
+        "Microsoft.Rest.ClientRuntime.nuspec",
+        "src/Common/BasicAuthenticationCredentials.cs",
+        "src/Common/GlobalSuppressions.cs",
+        "src/Common/HttpExtensions.cs",
+        "src/Common/HttpOperationException.cs",
+        "src/Common/HttpOperationResponse.cs",
+        "src/Common/IServiceClientTracingInterceptor.cs",
+        "src/Common/IServiceOperations.cs",
+        "src/Common/ITokenProvider.cs",
+        "src/Common/obj/Debug/.NETFramework,Version=v4.5.AssemblyAttribute.cs",
+        "src/Common/obj/Debug/.NETPortable,Version=v4.5,Profile=Profile111.AssemblyAttribute.cs",
+        "src/Common/obj/Net40-Debug/.NETFramework,Version=v4.0.AssemblyAttribute.cs",
+        "src/Common/obj/Net45-Debug/.NETFramework,Version=v4.5.AssemblyAttribute.cs",
+        "src/Common/obj/Portable-Debug/.NETPortable,Version=v4.5,Profile=Profile111.AssemblyAttribute.cs",
+        "src/Common/PlatformTask.cs",
+        "src/Common/Properties/AssemblyInfo.cs",
+        "src/Common/Properties/Resources.Designer.cs",
+        "src/Common/Properties/Resources.resx",
+        "src/Common/RestException.cs",
+        "src/Common/RetryDelegatingHandler.cs",
+        "src/Common/Serialization/DateJsonConverter.cs",
+        "src/Common/Serialization/JsonConverterHelper.cs",
+        "src/Common/Serialization/PolymorphicDeserializeJsonConverter.cs",
+        "src/Common/Serialization/PolymorphicJsonConverter.cs",
+        "src/Common/Serialization/PolymorphicSerializeJsonConverter.cs",
+        "src/Common/Serialization/ReadOnlyJsonContractResolver.cs",
+        "src/Common/ServiceClient.cs",
+        "src/Common/ServiceClientCredentials.cs",
+        "src/Common/ServiceClientTracing.cs",
+        "src/Common/StringTokenProvider.cs",
+        "src/Common/TokenCredentials.cs",
+        "src/Common/TransientFaultHandling/AsyncExecution.cs",
+        "src/Common/TransientFaultHandling/ExponentialBackoffRetryStrategy.cs",
+        "src/Common/TransientFaultHandling/FixedIntervalRetryStrategy.cs",
+        "src/Common/TransientFaultHandling/Guard.cs",
+        "src/Common/TransientFaultHandling/HttpRequestWithStatusException.cs",
+        "src/Common/TransientFaultHandling/HttpStatusCodeErrorDetectionStrategy.cs",
+        "src/Common/TransientFaultHandling/IncrementalRetryStrategy.cs",
+        "src/Common/TransientFaultHandling/ITransientErrorDetectionStrategy.cs",
+        "src/Common/TransientFaultHandling/RetryCondition.cs",
+        "src/Common/TransientFaultHandling/RetryingEventArgs.cs",
+        "src/Common/TransientFaultHandling/RetryManager.cs",
+        "src/Common/TransientFaultHandling/RetryPolicy.cs",
+        "src/Common/TransientFaultHandling/RetryPolicy.Generic.cs",
+        "src/Common/TransientFaultHandling/RetryStrategy.cs",
+        "src/Common/TransientFaultHandling/TransientErrorIgnoreStrategy.cs",
+        "src/Common/TypeConversion.cs",
+        "src/Common/ValidationException.cs",
+        "src/Common/ValidationRules.cs"
+      ]
+    },
+    "Microsoft.Rest.ClientRuntime.Azure/1.0.18-preview": {
+      "sha512": "I9Vx4lXayk2znJ8z2F66EmdEvXucKEa83DTVs7Hzacq08axgYyPUegh30bpJ5I1LuTCw7ZFsOy++6umxcZ3Avw==",
+      "files": [
+        "lib/net45/Microsoft.Rest.ClientRuntime.Azure.dll",
+        "lib/net45/Microsoft.Rest.ClientRuntime.Azure.dll.mdb",
+        "lib/net45/Microsoft.Rest.ClientRuntime.Azure.xml",
+        "lib/portable-net45+win8+wpa81/Microsoft.Rest.ClientRuntime.Azure.dll",
+        "lib/portable-net45+win8+wpa81/Microsoft.Rest.ClientRuntime.Azure.dll.mdb",
+        "lib/portable-net45+win8+wpa81/Microsoft.Rest.ClientRuntime.Azure.xml",
+        "Microsoft.Rest.ClientRuntime.Azure.1.0.18-preview.nupkg",
+        "Microsoft.Rest.ClientRuntime.Azure.1.0.18-preview.nupkg.sha512",
+        "Microsoft.Rest.ClientRuntime.Azure.nuspec",
+        "src/Common/Authentication/ActiveDirectoryApplicationTokenProvider.cs",
+        "src/Common/Authentication/ActiveDirectoryEnvironment.cs",
+        "src/Common/Authentication/ActiveDirectoryUserTokenProvider.cs",
+        "src/Common/Authentication/ApplicationTokenCredentials.cs",
+        "src/Common/Authentication/AuthenticationException.cs",
+        "src/Common/Authentication/UserTokenCredentials.cs",
+        "src/Common/AzureAsyncOperation.cs",
+        "src/Common/AzureClientExtensions.cs",
+        "src/Common/AzureOperationResponse.cs",
+        "src/Common/ClientRequestTrackingHandler.cs",
+        "src/Common/CloudError.cs",
+        "src/Common/CloudErrorJsonConverter.cs",
+        "src/Common/CloudException.cs",
+        "src/Common/GlobalSuppressions.cs",
+        "src/Common/IAzureClient.cs",
+        "src/Common/JsonSerializerExtensions.cs",
+        "src/Common/obj/Net40-Debug/.NETFramework,Version=v4.0.AssemblyAttribute.cs",
+        "src/Common/obj/Net45-Debug/.NETFramework,Version=v4.5.AssemblyAttribute.cs",
+        "src/Common/obj/Portable-Debug/.NETPortable,Version=v4.5,Profile=Profile111.AssemblyAttribute.cs",
+        "src/Common/OData/FilterString.cs",
+        "src/Common/OData/UrlExpressionVisitor.cs",
+        "src/Common/Page.cs",
+        "src/Common/PollingState.cs",
+        "src/Common/Properties/AssemblyInfo.cs",
+        "src/Common/Properties/Resources.Designer.cs",
+        "src/Common/Properties/Resources.resx",
+        "src/Common/Resource.cs",
+        "src/Common/ResourceJsonConverter.cs",
+        "src/Common/SubResource.cs"
+      ]
+    },
+    "Newtonsoft.Json/6.0.4": {
+      "sha512": "FyQLmEpjsCrEP+znauLDGAi+h6i9YnaMkITlfIoiM4RYyX3nki306bTHsr/0okiIvIc7BJhQTbOAIZVocccFUw==",
+      "files": [
+        "lib/net20/Newtonsoft.Json.dll",
+        "lib/net20/Newtonsoft.Json.xml",
+        "lib/net35/Newtonsoft.Json.dll",
+        "lib/net35/Newtonsoft.Json.xml",
+        "lib/net40/Newtonsoft.Json.dll",
+        "lib/net40/Newtonsoft.Json.xml",
+        "lib/net45/Newtonsoft.Json.dll",
+        "lib/net45/Newtonsoft.Json.xml",
+        "lib/netcore45/Newtonsoft.Json.dll",
+        "lib/netcore45/Newtonsoft.Json.xml",
+        "lib/portable-net40+sl5+wp80+win8+wpa81/Newtonsoft.Json.dll",
+        "lib/portable-net40+sl5+wp80+win8+wpa81/Newtonsoft.Json.xml",
+        "lib/portable-net45+wp80+win8+wpa81/Newtonsoft.Json.dll",
+        "lib/portable-net45+wp80+win8+wpa81/Newtonsoft.Json.xml",
+        "Newtonsoft.Json.6.0.4.nupkg",
+        "Newtonsoft.Json.6.0.4.nupkg.sha512",
+        "Newtonsoft.Json.nuspec",
+        "tools/install.ps1"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    "": [
+      "Microsoft.Rest.ClientRuntime >= 1.1.1",
+      "Microsoft.Rest.ClientRuntime.Azure >= 1.0.18-preview"
+    ]
+  }
+}

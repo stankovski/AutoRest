@@ -1,0 +1,17 @@
+﻿# Authorization
+-CodeGenerator Go -Input .\azure-rest-api-specs\arm-authorization\2015-01-01\swagger\authorization.json -Namespace github.com/azure/azure-sdk-for-go/arm/authorization -OutputDirectory .\go\src\github.com\azure\azure-sdk-for-go\arm\authorization -Modeler Swagger
+
+# Compute
+-CodeGenerator Go -Input .\azure-rest-api-specs\arm-compute\2015-06-15\swagger\compute.json -Namespace github.com/azure/azure-sdk-for-go/arm/compute -OutputDirectory .\go\src\github.com\azure\azure-sdk-for-go\arm\compute -Modeler Swagger
+
+# Network
+-CodeGenerator Go -Input .\azure-rest-api-specs\arm-network\2015-05-01-preview\swagger\network.json -Namespace github.com/azure/azure-sdk-for-go/arm/network -OutputDirectory .\go\src\github.com\azure\azure-sdk-for-go\arm\network -Modeler Swagger
+
+# Resources
+-CodeGenerator Go -Input .\azure-rest-api-specs\arm-resources\2014-04-01-preview\swagger\resources.json -Namespace github.com/azure/azure-sdk-for-go/arm/resources -OutputDirectory .\go\src\github.com\azure\azure-sdk-for-go\arm\resources -Modeler Swagger
+
+# Storage
+-CodeGenerator Go -Input .\azure-rest-api-specs\arm-storage\2015-05-01-preview\swagger\storage.json -Namespace github.com/azure/azure-sdk-for-go/arm/storage -OutputDirectory .\go\src\github.com\azure\azure-sdk-for-go\arm\storage -Modeler Swagger
+
+# Subscriptions
+-CodeGenerator Go -Input .\azure-rest-api-specs\arm-subscriptions\2014-04-01-preview\swagger\subscriptions.json -Namespace github.com/azure/azure-sdk-for-go/arm/subscriptions -OutputDirectory .\go\src\github.com\azure\azure-sdk-for-go\arm\subscriptions -Modeler Swagger

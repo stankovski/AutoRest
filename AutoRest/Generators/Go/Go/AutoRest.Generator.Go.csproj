@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" InitialTargets="TurnOffCodeAnalysis">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\..\</SolutionDir>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <LibraryFxTarget Condition="'$(LibraryFxTarget)' == ''">net45</LibraryFxTarget>
+    <ProjectGuid>{8C63B860-D408-4A76-845B-63B4C76A58A9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Microsoft.Rest.Generator.Go</RootNamespace>
+    <AssemblyName>AutoRest.Generator.Go</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Net45-Debug'">
+    <DocumentationFile>bin\Net45-Debug\AutoRest.Generator.Go.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Net45-Release'">
+    <DocumentationFile>bin\Net45-Release\AutoRest.Generator.Go.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Net40-Debug'">
+    <DocumentationFile>bin\Net40-Debug\AutoRest.Generator.Go.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Net40-Release'">
+    <DocumentationFile>bin\Net40-Release\AutoRest.Generator.Go.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Portable-Debug'">
+    <DocumentationFile>bin\Portable-Debug\AutoRest.Generator.Go.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Portable-Release'">
+    <DocumentationFile>bin\Portable-Release\AutoRest.Generator.Go.xml</DocumentationFile>
+  </PropertyGroup>
+  <Import Project="$(SolutionDir)\Tools\AutoRest.Settings.targets" />
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(SolutionDir)\Tools\AssemblyVersionInfo.cs">
+      <Link>Properties\AssemblyVersionInfo.cs</Link>
+    </Compile>
+    <Compile Include="SyntheticType.cs" />
+    <Compile Include="MethodScopeProvider.cs" />
+    <Compile Include="GoCodeGenerator.cs" />
+    <Compile Include="GoCodeNamer.cs" />
+    <Compile Include="IScopeProvider.cs" />
+    <Compile Include="PackageType.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="VariableScopeProvider.cs" />
+    <Compile Include="Template.cs" />
+    <Compile Include="TemplateModels\EnumTemplateModel.cs" />
+    <Compile Include="TemplateModels\MethodGroupTemplateModel.cs" />
+    <Compile Include="TemplateModels\ModelsTemplateModel.cs" />
+    <Compile Include="TemplateModels\ServiceClientTemplateModel.cs" />
+    <Compile Include="TemplateModels\MethodTemplateModel.cs" />
+    <Compile Include="ClientModelExtensions.cs" />
+    <Compile Include="TemplateModels\PropertyTemplateModel.cs" />
+    <Compile Include="TemplateModels\ModelTemplateModel.cs" />
+    <Compile Include="Templates\EnumTemplate.cs" />
+    <Compile Include="Templates\MethodGroupTemplate.cs" />
+    <Compile Include="Templates\MethodTemplate.cs" />
+    <Compile Include="Templates\ModelsTemplate.cs" />
+    <Compile Include="Templates\ModelTemplate.cs" />
+    <Compile Include="Templates\ServiceClientTemplate.cs" />
+    <None Include="Templates\EnumTemplate.cshtml" />
+    <None Include="Templates\MethodGroupTemplate.cshtml" />
+    <None Include="Templates\ModelsTemplate.cshtml" />
+    <None Include="Templates\ServiceClientTemplate.cshtml" />
+    <None Include="Templates\MethodTemplate.cshtml" />
+    <None Include="Templates\ModelTemplate.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\AutoRest.Core\AutoRest.Core.csproj">
+      <Project>{c876085f-9dc3-41f0-b7b4-17022cd84684}</Project>
+      <Name>AutoRest.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

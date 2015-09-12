@@ -1,0 +1,59 @@
+﻿@using System;
+@using System.Collections.Generic;
+@using System.Linq;
+
+@using Microsoft.Rest.Generator.Go
+@using Microsoft.Rest.Generator.Go.Templates
+@using Microsoft.Rest.Generator.Utilities
+
+@inherits Microsoft.Rest.Generator.Go.Template<Microsoft.Rest.Generator.Go.ServiceClientTemplateModel>
+@{
+    var imports = Model.Imports;
+    var modelName = GoCodeNamer.CamelCase(Model.Name);
+}
+package @Model.PackageName
+@EmptyLine
+@Header("// ")
+
+@EmptyLine
+import (
+@foreach (var import in imports)
+{
+    @:"@(import)"
+}
+)
+@EmptyLine
+
+const (
+    ApiVersion = "@Model.ApiVersion"
+    DefaultBaseUri = "@Model.BaseUrl"
+)
+@EmptyLine
+
+@WrapComment("// ", Model.Documentation)
+type @(Model.ClientName) struct {
+    autorest.Client
+    BaseUri string
+    SubscriptionId string
+}
+@EmptyLine
+
+func New(subscriptionId string) @(Model.ClientName) {
+    return NewWithBaseUri(DefaultBaseUri, subscriptionId)
+}
+@EmptyLine
+
+func NewWithBaseUri(baseUri string, subscriptionId string) @(Model.ClientName) {
+    return @(Model.ClientName){
+        Client: autorest.DefaultClient,
+        BaseUri: baseUri,
+        SubscriptionId: subscriptionId,
+    }
+}
+@EmptyLine
+
+@foreach (var method in Model.UngroupedMethods)
+{
+@:@(Include<MethodTemplate, MethodTemplateModel>(new MethodTemplate(), method))
+@:@EmptyLine
+}

@@ -166,6 +166,7 @@ namespace Microsoft.Rest.Generator
         /// <returns>The formatted string.</returns>
         public virtual string GetInterfaceName(string name)
         {
+            // TODO (gosdk): Correct interface names
             if (string.IsNullOrWhiteSpace(name))
             {
                 return name;

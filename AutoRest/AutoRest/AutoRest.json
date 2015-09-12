@@ -1,5 +1,8 @@
 ﻿{
   "codeGenerators": {
+    "Go": {
+      "type": "GoCodeGenerator, AutoRest.Generator.Go"
+    },
     "Ruby": {
       "type": "RubyCodeGenerator, AutoRest.Generator.Ruby"
     },

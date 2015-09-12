@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "Microsoft.Rest.ClientRuntime": "1.1.1",
+    "Microsoft.Rest.ClientRuntime.Azure": "1.0.18-preview"
+  }
+}

@@ -1,0 +1,21 @@
+﻿@using System;
+@using System.Collections.Generic;
+@using System.Linq;
+
+@using Microsoft.Rest.Generator.Go
+@using Microsoft.Rest.Generator.Go.Templates
+@using Microsoft.Rest.Generator.Utilities
+
+@inherits Microsoft.Rest.Generator.Go.Template<Microsoft.Rest.Generator.Go.ModelTemplateModel>
+@{
+    var modelName = GoCodeNamer.CamelCase(Model.Name);
+}
+
+@WrapComment("// ", Model.Documentation)
+type @Model.Name struct {
+@if (Model.IsResponseType)
+{
+    @:autorest.Response `json:"-"`
+}
+    @(Model.Fields())
+}
