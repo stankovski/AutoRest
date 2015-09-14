@@ -42,6 +42,8 @@ DEMO:
              This will run the server that responds "hi" to the request
            - Run cmd> helloworld\csharp>dnx run
              Now we run autorest generated client in the shiny new ProjectK environment
+           - Run cmd> helloworld\nodejs>node app.js
+             Same using nodejs
            - Show other languages
 - So here you go. Please check our github page and give it a try.
            
