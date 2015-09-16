@@ -1,7 +1,5 @@
 DNX SETUP:
-dnvm install latest
-dnu use 1.0.0-beta7 -Persistent
-dnu restore
+dnvm install latest; dnu use 1.0.0-beta7 -Persistent; dnu restore
 
 SETUP:
 - Chrome Tabs
@@ -11,12 +9,12 @@ SETUP:
 - New project in VS
 - AutoRest solution
 
-
-
 DEMO:
 - AutoRest is a conceptual reincarnation of Hydra. However only the concept of code generation remained, everything else is new - new code, new name, new data source
     [DEMO] Show github page for AutoRest
 - AutoRest is now open source and is shipped via nuget, chocolatey, and Visual Studio (kudos to Bala and his team for the integration)
+- AutoRest is based on a community driven open standard for API definition called Swagger - for those who are not familiar with Swagger, it's like WSDL for REST defined in JSON or YAML
+    [DEMO] Show swagger website
 - As part of re-writing Hydra we have made a decision to move away from Code DOM and do template based code generation based on Razor
 - As a result code maintainability has improved significantly and the entry barrier for adding new languages by the community has significantly decreased
 - By the way Razor rocks as it allowed us not only to improve processing time due to precompiled templates but it also gave us model intellisense and enabled template debugging
@@ -30,11 +28,10 @@ DEMO:
              This will run the server that responds "hi" to the request
            - Run cmd> helloworld\csharp>dnx run
              Now we run autorest generated client in the shiny new ProjectK environment
+             Due to time constraints I'm not showing this but our generated clients works just as well on Mac and Unix
            - Run cmd> helloworld\nodejs>node app.js
              Same using nodejs
            - Show other languages
-- AutoRest is based on a community driven open standard for API definition called Swagger - for those who are not familiar with Swagger, it's like WSDL for REST defined in JSON or YAML
-    [DEMO] Show swagger website
 - Swagger is pretty cool in that it allows for vendor extensions which we've used for Azure to annotate certain APIs with additional behavior such as Long Running Operation or List Pagination
 - Combined with tools like Swashbuckle Azure teams can produce REST client directly from the server code (of course to produce "nice" APIs certain server side annotations and configurations are required)
 - As part of going open source and providing transparency to the community we have also opened Azure Swagger specs repo.
