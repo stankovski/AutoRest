@@ -1,0 +1,5 @@
+build:
+  image: azuresdk/ci-autorest
+  commands:
+    - npm install
+    - gulp
