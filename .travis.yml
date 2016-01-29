@@ -5,7 +5,7 @@ env:
   matrix:
   - DNX_VERSION=1.0.0-rc1-final DNX_USER_HOME=~/.dnx
 mono:
-- 4.0.5
+- beta
 os:
 - linux
 - osx
@@ -18,7 +18,8 @@ addons:
     - lib32gcc1
     - lib32ncurses5
     - lib32z1
-    # Packages for DNX    - gettext
+    # Packages for DNX 
+    - gettext
     - libcurl4-openssl-dev
     - libicu-dev
     - libssl-dev
@@ -29,11 +30,10 @@ install:
   - curl -sSL https://raw.githubusercontent.com/aspnet/Home/dev/dnvminstall.sh | DNX_USER_HOME=$DNX_USER_HOME
     DNX_BRANCH=v$DNX_VERSION sh
   - source $DNX_USER_HOME/dnvm/dnvm.sh
+  - dnvm upgrade
   - dnvm install $DNX_VERSION -r mono
   - dnvm install $DNX_VERSION -r coreclr -alias default
-  - dnvm alias default | xargs -i ln -s $DNX_USER_HOME/runtimes/{} $DNX_USER_HOME/runtimes/default
   # Install npm
-  - curl -sSL https://raw.githubusercontent.com/aspnet/Home/dev/dnvminstall.sh | sh && source ~/.dnx/dnvm/dnvm.sh && dnvm upgrade
   - npm install -g npm@'>=1.4.3'
   - npm install
   # Install ruby dependencies
