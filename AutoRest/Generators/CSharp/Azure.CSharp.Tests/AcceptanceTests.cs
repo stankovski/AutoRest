@@ -113,7 +113,7 @@ namespace Microsoft.Rest.Generator.CSharp.Azure.Tests
             }
         }
 
-        [Fact (Skip = "CoreCLR")]
+        [Fact]
         public void LroHappyPathTests()
         {
             SwaggerSpecRunner.RunTests(
