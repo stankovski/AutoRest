@@ -20,7 +20,6 @@ using Fixtures.Azure.AcceptanceTestsResourceFlattening.Models;
 using Fixtures.Azure.AcceptanceTestsSubscriptionIdApiVersion;
 using Fixtures.Azure.AcceptanceTestsAzureParameterGrouping;
 using Fixtures.Azure.AcceptanceTestsAzureParameterGrouping.Models;
-using AutoRest.Generator.Azure.CSharp.Tests.Properties;
 using Microsoft.Rest.Generator.CSharp.Tests;
 using Xunit;
 using Xunit.Abstractions;
@@ -407,12 +406,9 @@ namespace Microsoft.Rest.Generator.CSharp.Azure.Tests
                 {
                     foreach (var r in report)
                     {
-                        _interceptor.Information(string.Format(CultureInfo.CurrentCulture,
-                            Resources.TestCoverageReportItemFormat, r.Key, r.Value));
+                        _interceptor.Information($"{r.Key}/{r.Value}");
                     }
-                    _interceptor.Information(string.Format(CultureInfo.CurrentCulture,
-                        Resources.TestCoverageReportSummaryFormat,
-                        executedTests, totalTests));
+                    _interceptor.Information($"The test coverage for Azure is {executedTests}/{totalTests}.");
                     Assert.Equal(executedTests, totalTests);
                 }
             }
