@@ -7,17 +7,19 @@ API descriptions that are valid according to the schema can produce client libra
 ## Contents
 - [Data Types](#data-types)
 	- [Primitive Data Types](#primitive-data-types)
-	- [`byte[]`, `DateTimeOffset`, `int`, `long`](#byte-datetimeoffset-int-long)
+	- [`byte[]`, `DateTime`, `int`, `long`](#byte-datetime-int-long)
 	- [Arrays and Sequences](#arrays-and-sequences)
 	- [Dictionaries](#dictionaries)
 	- [Inheritance and Polymorphism](#inheritance-and-polymorphism)
 		- [Inheritance](#inheritance)
 		- [Polymorphism](#polymorphism)
+		- [Constants](#constants)
 	- [Type Name Generation](#type-name-generation)
 - [Operations](#operations)
 	- [Generating Operation Classes](#generating-operation-classes)
 	- [Specifying required parameters and properties](#specifying-required-parameters-and-properties)
 	- [Error Modeling](#error-modeling)
+	- [Composite Clients](#composite-clients)
 - [Extensions](#extensions)
 
 ## Data Types
@@ -43,27 +45,15 @@ Generates C# client model type:
 ```csharp
 public partial class Pet
 {
-    private int? _age;
+    /// <summary>
+    /// Optional.
+    /// </summary>
+    public int? Age { get; set; }
 
     /// <summary>
     /// Optional.
     /// </summary>
-    public int? Age
-    {
-        get { return this._age; }
-        set { this._age = value; }
-    }
-
-    private string _name;
-
-    /// <summary>
-    /// Optional.
-    /// </summary>
-    public string Name
-    {
-        get { return this._name; }
-        set { this._name = value; }
-    }
+    public string Name { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the Pet class.
@@ -74,12 +64,12 @@ public partial class Pet
 }
 ```
 
-### `byte[]`, `DateTimeOffset`, `int`, `long`
+### `byte[]`, `DateTime`, `int`, `long`
 - **`byte[]`**
 To represent `byte` arrays in the generated code, the property of the Swagger definition should have `string` as its type and `byte` as its format. This indicates binary data that will be represented as a base64-encoded string in requests and responses. The generated client will automatically do this encoding when processing requests and responses.
 
-- **`DateTimeOffset`**
-AutoRest generates `DateTimeOffset` typed properties in generated C# code for Swagger properties that have `string` as the type and `date-time` as the format.
+- **`DateTime`**
+AutoRest generates `DateTime` typed properties in generated C# code for Swagger properties that have `string` as the type and `date-time` as the format. Note: it's possible to generate these properties as `DateTimeOffset` in C# when `-useDateTimeOffset` parameter is passed via command line. 
 
 - **`int` / `long`**
 Both `int` and `long` proeprties in the generated code correspond to `integer` types in Swagger properties. If the format of the Swagger property is `int32`, `int` will be generated; if the format is `int64`, `long` will be generated. If the format field of the Swagger property is not set, AutoRest use  format `int32`.
@@ -112,49 +102,25 @@ Generates C# client model type:
 ```csharp
 public partial class Pet
 {
-    private int? _age;
+    /// <summary>
+    /// Optional.
+    /// </summary>
+    public int? Age { get; set; }
 
     /// <summary>
     /// Optional.
     /// </summary>
-    public int? Age
-    {
-        get { return this._age; }
-        set { this._age = value; }
-    }
-
-    private DateTimeOffset? _birthday;
+    public DateTime? Birthday { get; set; }
 
     /// <summary>
     /// Optional.
     /// </summary>
-    public DateTimeOffset? Birthday
-    {
-        get { return this._birthday; }
-        set { this._birthday = value; }
-    }
-
-    private byte[] _name;
+    public byte[] Name { get; set; }
 
     /// <summary>
     /// Optional.
     /// </summary>
-    public byte[] Name
-    {
-        get { return this._name; }
-        set { this._name = value; }
-    }
-
-    private long? _number;
-
-    /// <summary>
-    /// Optional.
-    /// </summary>
-    public long? Number
-    {
-        get { return this._number; }
-        set { this._number = value; }
-    }
+    public long? Number { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the Pet class.
@@ -184,23 +150,16 @@ Generates C# client model type
 ```csharp
 public partial class Pet
 {
-    private IList<string> _names;
-
     /// <summary>
     /// Optional.
     /// </summary>
-    public IList<string> Names
-    {
-        get { return this._names; }
-        set { this._names = value; }
-    }
+    public IList<string> Names { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the Pet class.
     /// </summary>
     public Pet()
     {
-        this.Names = new LazyList<string>();
     }
 }
 ```
@@ -218,23 +177,117 @@ The following definition
 ```
 will generate C# client library
 ```csharp
-public static partial class StringDictionary
+public partial class Pet
 {
     /// <summary>
-    /// Deserialize the object
+    /// Optional.
     /// </summary>
-    public static IDictionary<string, string> DeserializeJson(JToken inputObject)
+    public IDictionary<string, string> StringDictionary { get; set; }
+
+    /// <summary>
+    /// Initializes a new instance of the Pet class.
+    /// </summary>
+    public Pet()
     {
-        IDictionary<string, string> deserializedObject = new Dictionary<string, string>();
-        foreach (JProperty property in inputObject)
-        {
-            deserializedObject.Add(((string)property.Name), ((string)property.Value));
-        }
-        return deserializedObject;
     }
 }
 ```
-In the example for Sequences, the `Pet` is a POCO model while in this example the `StringDictionary` only generates a static class helper for deserialization. A model type is generated if the corresponding Swagger schema is of type 'object' or has one or more 'properties'. A static helper class is generated if the corresponding Swagger schema specifies a primitive type or 'array'. This rule applies to all schemas in both parameters and responses.
+
+Swagger and AutoRest also support Dictionary in Dictionary and Array in Dictionary. For example
+```json
+"additionalProperties": {
+   "type": "object",
+   "additionalProperties": {
+     "type": "string"
+   }
+}
+```
+becomes
+```csharp
+public partial class Pet
+{
+    /// <summary>
+    /// Optional.
+    /// </summary>
+    public IDictionary<string, IDictionary<string, string>> CompositeDictionary { get; set; }
+
+    /// <summary>
+    /// Initializes a new instance of the Pet class.
+    /// </summary>
+    public Pet()
+    {
+    }
+}
+```
+
+### Constants
+AutoRest generates constant value for _required_ parameters and properties defined with _one_ enum value. Constant operation parameters are not exposed to the end user and are injected in the method body. Constant definition properties are also automatically added to the payload body.
+
+Example of a constant in a definition:
+```js
+"Product": {
+   "description": "The product documentation.",
+   "required": [ "constProperty" ],
+   "properties": {
+     "constProperty": {
+       "type": "string",
+       "description": "Constant string",
+       "enum": [ "some value" ]
+     }
+   }
+ }
+```
+become
+``` cs
+/// <summary>
+/// The product documentation.
+/// </summary>
+public partial class Product
+{
+    /// <summary>
+    /// Initializes a new instance of the ConstantProduct class.
+    /// </summary>
+    public ConstantProduct() { }
+
+    /// <summary>
+    /// Static constructor for ConstantProduct class.
+    /// </summary>
+    static ConstantProduct()
+    {
+        ConstProperty = "some value";
+    }
+
+    /// <summary>
+    /// Constant string
+    /// </summary>
+    [JsonProperty(PropertyName = "constProperty")]
+    public static string ConstProperty { get; private set; }
+```
+
+
+Example of a constant in an operation:
+```js
+"post": {
+  "operationId": "myOperation",
+  "parameters": [
+     {
+       "name": "constantParam",
+       "type": "string",
+       "enum": [ "some value" ],
+       "in": "path",
+       "required": true
+     }
+  ]
+}
+```
+becomes
+```cs
+public async Task<HttpOperationResponse> MyOperationWithHttpMessagesAsync(Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
+{
+     string constantParam = "some value";
+     ...
+}
+```
 
 ### Inheritance and Polymorphism
 #### Inheritance
@@ -261,121 +314,60 @@ AutoRest builds inheritance between types if an `allOf` field is specified in a 
   }
 }
 ```
+
 will generate C# model types
+
 ```csharp
 public partial class Cat : Pet
 {
-    private string _color;
-
     /// <summary>
-    /// Optional. cat color
+    /// Initializes a new instance of the Cat class.
     /// </summary>
-    public string Color
-    {
-        get { return this._color; }
-        set { this._color = value; }
-    }
+    public Cat() { }
 
     /// <summary>
     /// Initializes a new instance of the Cat class.
     /// </summary>
-    public Cat()
+    public Cat(int? id = default(int?), string name = default(string), string color = default(string))
+        : base(id, name)
     {
+        Color = color;
     }
 
     /// <summary>
-    /// Serialize the object
     /// </summary>
-    /// <returns>
-    /// Returns the json model for the type Cat
-    /// </returns>
-    public override JToken SerializeJson(JToken outputObject)
-    {
-        outputObject = base.SerializeJson(outputObject);
-        if (outputObject == null)
-        {
-            outputObject = new JObject();
-        }
-        if (this.Color != null)
-        {
-            outputObject["color"] = this.Color;
-        }
-        return outputObject;
-    }
-
-    /// <summary>
-    /// Deserialize the object
-    /// </summary>
-    public override void DeserializeJson(JToken inputObject)
-    {
-        base.DeserializeJson(inputObject);
-        if (inputObject != null && inputObject.Type != JTokenType.Null)
-        {
-            JToken colorValue = inputObject["color"];
-            if (colorValue != null && colorValue.Type != JTokenType.Null)
-            {
-                this.Color = ((string)colorValue);
-            }
-        }
-    }
+    [JsonProperty(PropertyName = "color")]
+    public string Color { get; set; }
 }
 
 public partial class Pet
 {
-    private string _name;
-
     /// <summary>
-    /// Optional.
+    /// Initializes a new instance of the Pet class.
     /// </summary>
-    public string Name
-    {
-        get { return this._name; }
-        set { this._name = value; }
-    }
+    public Pet() { }
 
     /// <summary>
     /// Initializes a new instance of the Pet class.
     /// </summary>
-    public Pet()
+    public Pet(int? id = default(int?), string name = default(string))
     {
+        Id = id;
+        Name = name;
     }
 
     /// <summary>
-    /// Serialize the object
     /// </summary>
-    /// <returns>
-    /// Returns the json model for the type Pet
-    /// </returns>
-    public virtual JToken SerializeJson(JToken outputObject)
-    {
-        if (outputObject == null)
-        {
-            outputObject = new JObject();
-        }
-        if (this.Name != null)
-        {
-            outputObject["name"] = this.Name;
-        }
-        return outputObject;
-    }
+    [JsonProperty(PropertyName = "id")]
+    public int? Id { get; set; }
 
     /// <summary>
-    /// Deserialize the object
     /// </summary>
-    public virtual void DeserializeJson(JToken inputObject)
-    {
-        if (inputObject != null && inputObject.Type != JTokenType.Null)
-        {
-            JToken nameValue = inputObject["name"];
-            if (nameValue != null && nameValue.Type != JTokenType.Null)
-            {
-                this.Name = ((string)nameValue);
-            }
-        }
-    }
+    [JsonProperty(PropertyName = "name")]
+    public string Name { get; set; }
+
 }
 ```
-In `Cat`'s serialization and deserialization methods, `Pet`'s corresponding methods are called first to build all the properties of `Pet`.
 
 #### Polymorphism
 To describe polymorphic inheritance between types, Swagger uses an extra "discriminator" field to indicate the exact serialization of the object on the wire. To make a set of classes polymorphic, use 'allOf' with a schema reference to indicate inheritance from a base schema and a discriminator field to the base schema. In the example above, adding a discriminator field named `objectType` to `Pet` will make the genereated set of classes polymorphic:
@@ -395,61 +387,23 @@ To describe polymorphic inheritance between types, Swagger uses an extra "discri
   }
 }
 ```
-The generated models in C# code are nearly identical, but the base serialization and deserialization methods are changed as follows:
+The generated models in C# code are nearly identical, with `objectType` property excluded and a special `JsonConverter` added in the client `Initialize` method:
+
 ```csharp
-public async Task<HttpOperationResponse<Pet>> GetPolymorphicPetsWithOperationResponseAsync(CancellationToken cancellationToken)
+public partial class MyClient : ServiceClient<AutoRestComplexTestService>, IAutoRestComplexTestService
 {
-
-............
-
-	// Serialize Request
-	string requestContent = null;
-	JToken requestDoc = petCreateOrUpdateParameter.SerializeJson(null);
-	if (petCreateOrUpdateParameter is Cat)
-	{
-	    requestDoc["ObjectType"] = "Cat";
-	}
-	else if (petCreateOrUpdateParameter is Dog)
-	{
-	    requestDoc["ObjectType"] = "Dog";
-	}
-	else
-	{
-	    requestDoc["ObjectType"] = "Pet";
-	}
-
-............
-
-	// Deserialize Response
-	if (statusCode == HttpStatusCode.OK)
-	{
-	    Pet resultModel = new Pet();
-	    JToken responseDoc = null;
-	    if (string.IsNullOrEmpty(responseContent) == false)
-	    {
-	        responseDoc = JToken.Parse(responseContent);
-	    }
-	    if (responseDoc != null)
-	    {
-	        string typeName = ((string)responseDoc["ObjectType"]);
-	        if (typeName == "Cat")
-	        {
-	            resultModel = new Cat();
-	        }
-	        else if (typeName == "Dog")
-	        {
-	            resultModel = new Dog();
-	        }
-	        else
-	        {
-	            resultModel = new Pet();
-	        }
-	        resultModel.DeserializeJson(responseDoc);
-	    }
-	    result.Body = resultModel;
-	}
-
-............
+    ...
+    
+    /// <summary>
+    /// Initializes client properties.
+    /// </summary>
+    private void Initialize()
+    {
+        ...
+        SerializationSettings.Converters.Add(new PolymorphicSerializeJsonConverter<Pet>("objectType"));
+        DeserializationSettings.Converters.Add(new PolymorphicDeserializeJsonConverter<Pet>("objectType"));
+    } 
+}
 ```
 
 ### Type Name Generation
@@ -601,7 +555,7 @@ Parameters in the 'path' or 'body' are **always** required. Parameters may also 
 ```
 Generates C# client side method of
 ```csharp
-public async Task<HttpOperationResponse<Product>> ListWithOperationResponseAsync(int subscriptionId, string resourceGroupName, int? apiVersion, CancellationToken cancellationToken)
+public async Task<HttpOperationResponse<Product>> ListWithOperationResponseAsync(int? subscriptionId, string resourceGroupName, int? apiVersion, CancellationToken cancellationToken)
 {
     // Validate
     if (resourceGroupName == null)
@@ -610,7 +564,6 @@ public async Task<HttpOperationResponse<Product>> ListWithOperationResponseAsync
     }
 ............
 ```
-where a non-nullable type is changed into its nullable wrapper if the corresponding parameter is optional and a validation is added if a nullable type is marked as required.
 
 > Note that parameters that have field `in` as path are always required and the `required` field will be ignored.
 
@@ -672,25 +625,32 @@ together with its definition
 ```
 Generates the following error handling code:
 ```csharp
-if (statusCode != HttpStatusCode.OK) // and more if more acceptable status codes
+if ((int)_statusCode != 200)
 {
-    Error errorModel = new Error();
-    JToken responseDoc = null;
-    if (string.IsNullOrEmpty(responseContent) == false)
+    var ex = new ErrorException(string.Format("Operation returned an invalid status code '{0}'", _statusCode));
+    try
     {
-        responseDoc = JToken.Parse(responseContent);
+        _responseContent = await _httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+        Error _errorBody = SafeJsonConvert.DeserializeObject<Error>(_responseContent, this.Client.DeserializationSettings);
+        if (_errorBody != null)
+        {
+            ex.Body = _errorBody;
+        }
     }
-    if (responseDoc != null)
+    catch (JsonException)
     {
-        errorModel.DeserializeJson(responseDoc);
+        // Ignore the exception
     }
-    HttpOperationException<Error> ex = new HttpOperationException<Error>();
-    ex.Request = httpRequest;
-    ex.Response = httpResponse;
-    ex.Body = errorModel;
-    if (shouldTrace)
+    ex.Request = new HttpRequestMessageWrapper(_httpRequest, _requestContent);
+    ex.Response = new HttpResponseMessageWrapper(_httpResponse, _responseContent);
+    if (_shouldTrace)
     {
-        ServiceClientTracing.Error(invocationId, ex);
+        ServiceClientTracing.Error(_invocationId, ex);
+    }
+    _httpRequest.Dispose();
+    if (_httpResponse != null)
+    {
+        _httpResponse.Dispose();
     }
     throw ex;
 }
@@ -698,6 +658,49 @@ if (statusCode != HttpStatusCode.OK) // and more if more acceptable status codes
 
 See [Error Handling](clients-error.md) for details on how to catch and use the exceptions from generated clients.
 
+### Composite Clients
+AutoRest supports a concept of a composite client where multiple swagger documents are merged together to generate a single ServiceClient. To use this feature the swagger documents need to conform to the following rules:
+
+   1. All swagger documents must share the same `host` and `basePath` values
+   2. All definitions with same names must be identical
+   3. All global client parameters with same names must be identical
+   4. Methods with the same `operationId` but different signature are allowed. However, there should be no methods with the same `operationId` and same signature.
+
+For Azure generators, composite clients will not have ApiVersion global property but will instead have apiVersion operation constants. 
+
+#### Generating Composite Clients
+In order to generate a composite client a custom metadata needs to be created.
+
+**Schema**: 
+
+Field Name | Type | Description
+---|:---:|---
+info| [`Info Object`](http://swagger.io/specification/#infoObject) | **Required**. The info object defines the name and description of the composite client.
+documents| string[] | **Required**. Collection of URLs or local paths that point to individual swagger documents. These URLs or paths are relative to the current working directory and as such it is strongly recommended to use absolute URLs.
+
+**Example**:
+```js
+{
+  "info": {
+    "title": "Composite Model",
+    "description": "Composite Swagger Client that represents merging two clients"
+  },
+  "documents": [
+    "http://myserver/swagger/swagger1.json",
+    "http://myserver/swagger/swagger2.json"
+  ]
+}
+```
+
+**Command Line**:
+
+A `CompositeSwagger` modeler should be used to generate composite clients. For example:
+
+```bash
+autorest.exe -modeler CompositeSwagger -input compositeDoc.json -output C:\Temp -codeGenerator CSharp
+```
+
+ 
 ## Extensions
 AutoRest supports a number of extensions used to configure generated clients. Please refer to [Swagger Extensions](swagger-extensions.md) document for details.
 

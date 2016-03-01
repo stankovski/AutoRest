@@ -28,14 +28,25 @@ namespace Microsoft.Rest.Generator.Azure.NodeJS
         public CompositeType ItemType { 
             get 
             {
-                var sequence = (SequenceType)Properties.FirstOrDefault(p => p.Type is SequenceType).Type;
-                return sequence.ElementType as CompositeType;
+                if (Properties == null)
+                {
+                    return null;
+                }
+                var property = Properties.FirstOrDefault(p => p.Type is SequenceType);
+                if (property != null)
+                {
+                    return ((SequenceType)property.Type).ElementType as CompositeType;
+                }
+                else
+                {
+                    return null;
+                }
             }
         }
 
         public override string ConstructModelMapper()
         {
-            var modelMapper = this.ConstructMapper(SerializedName, false, null, null, true, true);
+            var modelMapper = this.ConstructMapper(SerializedName, null, true, true);
             var builder = new IndentedStringBuilder("  ");
             builder.AppendLine("return {{{0}}};", modelMapper);
             return builder.ToString();

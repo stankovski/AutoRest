@@ -120,11 +120,54 @@
           }
         }
       }
+    },
+    "/validation/constantsInPath/{constantParam}/value": {
+      "get": {
+        "operationId": "getWithConstantInPath",
+        "parameters": [
+          {
+            "name": "constantParam",
+            "type": "string",
+            "enum": [ "constant" ],
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "operationId": "postWithConstantInBody",
+        "parameters": [
+          {
+            "name": "constantParam",
+            "type": "string",
+            "enum": [ "constant" ],
+            "in": "path",
+            "required": true
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "schema": { "$ref": "#/definitions/Product" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": { "$ref": "#/definitions/Product" }
+          }
+        }
+      }
     }
   },
   "definitions": {
     "Product": {
       "description": "The product documentation.",
+      "required": ["constString", "constInt"],
       "properties": {
         "display_names": {
           "type": "array",
@@ -148,6 +191,53 @@
           "type": "string",
           "description": "Image URL representing the product.",
           "pattern": "http://\\w+"
+        },
+        "child": {
+          "$ref": "#/definitions/ChildProduct"
+        },
+        "constChild": {
+          "$ref": "#/definitions/ConstantProduct"
+        },
+        "constInt": {
+          "type": "integer",
+          "description": "Constant int",
+          "enum": [ 0 ]
+        },
+        "constString": {
+          "type": "string",
+          "description": "Constant string",
+          "enum": [ "constant" ]
+        }
+      }
+    },
+    "ChildProduct": {
+      "description": "The product documentation.",
+      "required": [ "constProperty" ],
+      "properties": {
+        "constProperty": {
+          "type": "string",
+          "description": "Constant string",
+          "enum": [ "constant" ]
+        },
+        "count": {
+          "type": "integer",
+          "description": "Count"
+        }
+      }
+    },
+    "ConstantProduct": {
+      "description": "The product documentation.",
+      "required": [ "constProperty", "constProperty2" ],
+      "properties": {
+        "constProperty": {
+          "type": "string",
+          "description": "Constant string",
+          "enum": [ "constant" ]
+        },
+        "constProperty2": {
+          "type": "string",
+          "description": "Constant string2",
+          "enum": [ "constant2" ]
         }
       }
     },

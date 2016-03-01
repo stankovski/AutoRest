@@ -9,6 +9,7 @@ using Microsoft.Rest.Generator.ClientModel;
 using Microsoft.Rest.Generator.Utilities;
 using Microsoft.Rest.Modeler.Swagger.Model;
 using Microsoft.Rest.Generator;
+using System.Diagnostics;
 
 namespace Microsoft.Rest.Modeler.Swagger
 {
@@ -42,11 +43,16 @@ namespace Microsoft.Rest.Modeler.Swagger
         public virtual IType BuildServiceType(string serviceTypeName)
         {
             PrimaryType type = SwaggerObject.ToType();
-            if (type == PrimaryType.Object && "file".Equals(SwaggerObject.Format, StringComparison.OrdinalIgnoreCase))
+            Debug.Assert(type != null);
+
+            if (type.Type == KnownPrimaryType.Object && "file".Equals(SwaggerObject.Format, StringComparison.OrdinalIgnoreCase))
             {
-                type = PrimaryType.Stream;
+                type = new PrimaryType(KnownPrimaryType.Stream);
             }
-            if (SwaggerObject.Enum != null && SwaggerObject.Enum.Any() && type == PrimaryType.String)
+            type.Format = SwaggerObject.Format;
+            if (SwaggerObject.Enum != null && 
+                type.Type == KnownPrimaryType.String &&
+                (SwaggerObject.Enum.Count > 1 || IsExpandableEnum(SwaggerObject)))
             {
                 var enumType = new EnumType();
                 SwaggerObject.Enum.ForEach(v => enumType.Values.Add(new EnumValue { Name = v, SerializedName = v }));
@@ -135,6 +141,74 @@ namespace Microsoft.Rest.Modeler.Swagger
             }
 
             return type;
+        }
+
+        public static void PopulateParameter(IParameter parameter, SwaggerObject swaggerObject)
+        {
+            if (swaggerObject == null)
+            {
+                throw new ArgumentNullException("swaggerObject");
+            }
+            if (parameter == null)
+            {
+                throw new ArgumentNullException("parameter");
+            }
+            parameter.IsRequired = swaggerObject.IsRequired;
+            parameter.DefaultValue = swaggerObject.Default;
+
+            if (swaggerObject.Enum != null 
+                && swaggerObject.Enum.Count == 1 
+                && !IsExpandableEnum(swaggerObject) 
+                && swaggerObject.IsRequired)
+            {
+                parameter.DefaultValue = swaggerObject.Enum[0];
+                parameter.IsConstant = true;
+            }
+
+            var compositeType = parameter.Type as CompositeType;
+            if (compositeType != null && compositeType.ComposedProperties.All(p => p.IsConstant))
+            {
+                parameter.DefaultValue = "{}";
+                parameter.IsConstant = true;
+            }
+
+            parameter.Documentation = swaggerObject.Description;
+            parameter.CollectionFormat = swaggerObject.CollectionFormat;
+            var enumType = parameter.Type as EnumType;
+            if (enumType != null)
+            {
+                if (parameter.Documentation == null)
+                {
+                    parameter.Documentation = string.Empty;
+                }
+                else
+                {
+                    parameter.Documentation = parameter.Documentation.TrimEnd('.') + ". ";
+                }
+                parameter.Documentation += "Possible values include: " +
+                                           string.Join(", ", enumType.Values.Select(v =>
+                                               string.Format(CultureInfo.InvariantCulture,
+                                               "'{0}'", v.Name)));
+            }
+            swaggerObject.Extensions.ForEach(e => parameter.Extensions[e.Key] = e.Value);
+
+            SetConstraints(parameter.Constraints, swaggerObject);
+        }
+
+        private static bool IsExpandableEnum(SwaggerObject swaggerObject)
+        {
+            if (swaggerObject.Extensions.ContainsKey(CodeGenerator.EnumObject))
+            {
+                var enumObject = swaggerObject.Extensions[CodeGenerator.EnumObject] as Newtonsoft.Json.Linq.JContainer;
+                if (enumObject != null)
+                {
+                    if (enumObject["modelAsString"] != null)
+                    {
+                        return bool.Parse(enumObject["modelAsString"].ToString());
+                    }
+                }
+            }
+            return false;
         }
 
         public static void SetConstraints(Dictionary<Constraint, string> constraints, SwaggerObject swaggerObject)

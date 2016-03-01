@@ -7,6 +7,7 @@ using System.Linq;
 using Microsoft.Rest.Generator.ClientModel;
 using Microsoft.Rest.Generator.Utilities;
 using Microsoft.Rest.Modeler.Swagger.Model;
+using Microsoft.Rest.Modeler.Swagger.Properties;
 
 namespace Microsoft.Rest.Modeler.Swagger
 {
@@ -48,13 +49,13 @@ namespace Microsoft.Rest.Modeler.Swagger
                 && _schema.Type == DataType.Object 
                 && "file".Equals(SwaggerObject.Format, StringComparison.OrdinalIgnoreCase))
             {
-                return PrimaryType.Stream;
+                return new PrimaryType(KnownPrimaryType.Stream);
             }
 
             // If the object does not have any properties, treat it as raw json (i.e. object)
             if (_schema.Properties.IsNullOrEmpty() && string.IsNullOrEmpty(_schema.Extends))
             {
-                return PrimaryType.Object;
+                return new PrimaryType(KnownPrimaryType.Object);
             }
 
             // Otherwise create new object type
@@ -86,36 +87,28 @@ namespace Microsoft.Rest.Modeler.Swagger
                         }
                         var propertyType =
                             property.Value.GetBuilder(Modeler).BuildServiceType(propertyServiceTypeName);
+                        if (property.Value.ReadOnly && property.Value.IsRequired)
+                        {
+                            throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture,
+                           Resources.ReadOnlyNotRequired, name, serviceTypeName));
+                        }
 
                         var propertyObj = new Property
                         {
                             Name = name,
                             SerializedName = name,
                             Type = propertyType,
-                            IsRequired = property.Value.IsRequired,
-                            IsReadOnly = property.Value.ReadOnly,
-                            DefaultValue = property.Value.Default
+                            IsReadOnly = property.Value.ReadOnly
                         };
-                        SetConstraints(propertyObj.Constraints, property.Value);
-
-                        //propertyObj.Type = objectType;
-                        propertyObj.Documentation = property.Value.Description;
-                        var enumType = propertyType as EnumType;
-                        if (enumType != null)
+                        PopulateParameter(propertyObj, property.Value);
+                        var propertyCompositeType = propertyType as CompositeType;
+                        if (propertyObj.IsConstant || 
+                            (propertyCompositeType != null 
+                                && propertyCompositeType.ContainsConstantProperties))
                         {
-                            if (propertyObj.Documentation == null)
-                            {
-                                propertyObj.Documentation = string.Empty;
-                            }
-                            else
-                            {
-                                propertyObj.Documentation = propertyObj.Documentation.TrimEnd('.') + ". ";
-                            }
-                            propertyObj.Documentation += "Possible values for this property include: " +
-                                                       string.Join(", ", enumType.Values.Select(v =>
-                                                           string.Format(CultureInfo.InvariantCulture, 
-                                                           "'{0}'", v.Name))) + ".";
+                            objectType.ContainsConstantProperties = true;
                         }
+                        
                         objectType.Properties.Add(propertyObj);
                     }
                     else

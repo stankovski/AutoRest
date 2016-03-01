@@ -3,7 +3,7 @@
   "info": {
     "title": "AutoRest Complex Test Service",
     "description": "Test Infrastructure for AutoRest",
-    "version": "1.0.0"
+    "version": "2016-02-29"
   },
   "host": "localhost",
   "schemes": [
@@ -47,6 +47,9 @@
               "$ref": "#/definitions/basic"
             },
             "required": true
+          },
+          {
+            "$ref": "ApiVersionParameter"
           }
         ],
         "responses": {
@@ -1057,6 +1060,50 @@
           }
         }
       }
+    },
+    "/complex/readonlyproperty/valid": {
+      "get": {
+        "operationId": "readonlyproperty_getValid",
+        "description": "Get complex types that have readonly properties",
+        "responses": {
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/readonly-obj"
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "readonlyproperty_putValid",
+        "description": "Put complex types that have readonly properties",
+        "parameters": [
+          {
+            "name": "complexBody",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/readonly-obj"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Empty Response"
+          },
+          "default": {
+            "description": "Unexpected error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }  
+      }
     }
   },
   "definitions": {
@@ -1370,6 +1417,28 @@
           }
         }
       }
+    },
+    "readonly-obj": {
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "size": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    }
+  },
+  "parameters": {
+    "ApiVersionParameter": {
+      "name": "api-version",
+      "in": "query",
+      "description": "API ID.",
+      "required": true,
+      "type": "string",
+      "enum": [ "2014-04-01-preview" ]
     }
   }
-  }
+}

@@ -15,19 +15,18 @@ using Fixtures.Azure.AcceptanceTestsHeadExceptions;
 using Fixtures.Azure.AcceptanceTestsLro;
 using Fixtures.Azure.AcceptanceTestsLro.Models;
 using Fixtures.Azure.AcceptanceTestsPaging;
-using Fixtures.Azure.AcceptanceTestsResourceFlattening;
-using Fixtures.Azure.AcceptanceTestsResourceFlattening.Models;
 using Fixtures.Azure.AcceptanceTestsSubscriptionIdApiVersion;
 using Fixtures.Azure.AcceptanceTestsAzureParameterGrouping;
 using Fixtures.Azure.AcceptanceTestsAzureParameterGrouping.Models;
 using Microsoft.Rest.Generator.CSharp.Tests;
 using Xunit;
-using Xunit.Abstractions;
 using Microsoft.Rest.Azure;
 using AutoRest.Generator.CSharp.Tests.Utilities;
-using Microsoft.Framework.Logging;
 using Microsoft.Rest.Azure.OData;
 using Fixtures.Azure.AcceptanceTestsAzureSpecials.Models;
+using Fixtures.Azure.AcceptanceTestsCustomBaseUri;
+using System.Net;
+using System.Net.Http;
 
 namespace Microsoft.Rest.Generator.CSharp.Azure.Tests
 {
@@ -61,6 +60,41 @@ namespace Microsoft.Rest.Generator.CSharp.Azure.Tests
         private static string SwaggerPath(string file)
         {
             return Path.Combine("Swagger", file);
+        }
+
+        [Fact]
+        public void AzureCustomBaseUriTests()
+        {
+            SwaggerSpecRunner.RunTests(
+                SwaggerPath("custom-baseUrl.json"), ExpectedPath("CustomBaseUri"), generator: "Azure.CSharp");
+            using (var client = new AutoRestParameterizedHostTestClient(new TokenCredentials(Guid.NewGuid().ToString())))
+            {
+                // small modification to the "host" portion to include the port and the '.'
+                client.Host = string.Format(CultureInfo.InvariantCulture, "{0}.:{1}", client.Host, Fixture.Port);
+                Assert.Equal(HttpStatusCode.OK,
+                    client.Paths.GetEmptyWithHttpMessagesAsync("local").Result.Response.StatusCode);
+            }
+        }
+
+        [Fact]
+        public void AzureCustomBaseUriNegativeTests()
+        {
+            SwaggerSpecRunner.RunTests(
+                SwaggerPath("custom-baseUrl.json"), ExpectedPath("CustomBaseUri"), generator: "Azure.CSharp");
+            using (var client = new AutoRestParameterizedHostTestClient(new TokenCredentials(Guid.NewGuid().ToString())))
+            {
+                // use a bad acct name
+                Assert.Throws<HttpRequestException>(() =>
+                    client.Paths.GetEmpty("bad"));
+
+                // pass in null
+                Assert.Throws<ValidationException>(() => client.Paths.GetEmpty(null));
+
+                // set the global parameter incorrectly
+                client.Host = "badSuffix";
+                Assert.Throws<HttpRequestException>(() =>
+                    client.Paths.GetEmpty("local"));
+            }
         }
 
         [Fact]
@@ -347,6 +381,19 @@ namespace Microsoft.Rest.Generator.CSharp.Azure.Tests
                 }
                 Assert.Equal(10, count);
 
+                var options = new Fixtures.Azure.AcceptanceTestsPaging.Models.PagingGetMultiplePagesWithOffsetOptions();
+                options.Offset = 100;
+                result = client.Paging.GetMultiplePagesWithOffset(options, "client-id");
+                Assert.NotNull(result.NextPageLink);
+                count = 1;
+                while (result.NextPageLink != null)
+                {
+                    result = client.Paging.GetMultiplePagesWithOffsetNext(result.NextPageLink);
+                    count++;
+                }
+                Assert.Equal(10, count);
+                Assert.Equal(110, result.LastOrDefault().Properties.Id);
+
                 result = client.Paging.GetMultiplePagesRetryFirst();
                 Assert.NotNull(result.NextPageLink);
                 count = 1;
@@ -397,18 +444,21 @@ namespace Microsoft.Rest.Generator.CSharp.Azure.Tests
             {
                 var report = client.GetReport();
 #if PORTABLE
-                float totalTests = report.Count - 5;
+                float totalTests = report.Count - 6;
 #else
                 float totalTests = report.Count;
 #endif
                 float executedTests = report.Values.Count(v => v > 0);
                 if (executedTests < totalTests)
                 {
-                    foreach (var r in report)
+                    foreach (var r in report.Where(r => r.Value == 0))
                     {
-                        _interceptor.Information($"{r.Key}/{r.Value}");
+                        _interceptor.Information(string.Format(CultureInfo.CurrentCulture,
+                            "{0}/{1}", r.Key, r.Value));
                     }
-                    _interceptor.Information($"The test coverage for Azure is {executedTests}/{totalTests}.");
+                    _interceptor.Information(string.Format(CultureInfo.CurrentCulture,
+                        "The test coverage for Azure is {0}/{1}",
+                        executedTests, totalTests));
                     Assert.Equal(executedTests, totalTests);
                 }
             }
@@ -422,219 +472,9 @@ namespace Microsoft.Rest.Generator.CSharp.Azure.Tests
         }
 
         [Fact]
-        public void ResourceFlatteningArrayTests()
-        {
-            using (
-                var client = new AutoRestResourceFlatteningTestService(Fixture.Uri,
-                    new TokenCredentials(Guid.NewGuid().ToString())))
-            {
-                //Array
-                var result = client.GetArray();
-                Assert.Equal(3, result.Count);
-                // Resource 1
-                Assert.Equal("1", result[0].Id);
-                Assert.Equal("OK", result[0].ProvisioningStateValues);
-                Assert.Equal("Product1", result[0].Pname);
-                Assert.Equal("Flat", result[0].FlattenedProductType);
-                Assert.Equal("Building 44", result[0].Location);
-                Assert.Equal("Resource1", result[0].Name);
-                Assert.Equal("Succeeded", result[0].ProvisioningState);
-                Assert.Equal("Microsoft.Web/sites", result[0].Type);
-                Assert.Equal("value1", result[0].Tags["tag1"]);
-                Assert.Equal("value3", result[0].Tags["tag2"]);
-                // Resource 2
-                Assert.Equal("2", result[1].Id);
-                Assert.Equal("Resource2", result[1].Name);
-                Assert.Equal("Building 44", result[1].Location);
-                // Resource 3
-                Assert.Equal("3", result[2].Id);
-                Assert.Equal("Resource3", result[2].Name);
-
-                var resourceArray = new List<Fixtures.Azure.AcceptanceTestsResourceFlattening.Models.Resource>();
-                resourceArray.Add(new FlattenedProduct
-                {
-                    Location = "West US",
-                    Tags = new Dictionary<string, string>()
-                    {
-                        {"tag1", "value1"},
-                        {"tag2", "value3"}
-                    }
-                });
-                resourceArray.Add(new FlattenedProduct
-                {
-                    Location = "Building 44"
-                });
-
-                client.PutArray(resourceArray);
-            }
-        }
-
-        [Fact]
-        public void ResourceFlatteningDictionaryTests()
-        {
-            using (
-                var client = new AutoRestResourceFlatteningTestService(Fixture.Uri,
-                    new TokenCredentials(Guid.NewGuid().ToString())))
-            {
-                //Dictionary
-                var resultDictionary = client.GetDictionary();
-                Assert.Equal(3, resultDictionary.Count);
-                // Resource 1
-                Assert.Equal("1", resultDictionary["Product1"].Id);
-                Assert.Equal("OK", resultDictionary["Product1"].ProvisioningStateValues);
-                Assert.Equal("Product1", resultDictionary["Product1"].Pname);
-                Assert.Equal("Flat", resultDictionary["Product1"].FlattenedProductType);
-                Assert.Equal("Building 44", resultDictionary["Product1"].Location);
-                Assert.Equal("Resource1", resultDictionary["Product1"].Name);
-                Assert.Equal("Succeeded", resultDictionary["Product1"].ProvisioningState);
-                Assert.Equal("Microsoft.Web/sites", resultDictionary["Product1"].Type);
-                Assert.Equal("value1", resultDictionary["Product1"].Tags["tag1"]);
-                Assert.Equal("value3", resultDictionary["Product1"].Tags["tag2"]);
-                // Resource 2
-                Assert.Equal("2", resultDictionary["Product2"].Id);
-                Assert.Equal("Resource2", resultDictionary["Product2"].Name);
-                Assert.Equal("Building 44", resultDictionary["Product2"].Location);
-                // Resource 3
-                Assert.Equal("3", resultDictionary["Product3"].Id);
-                Assert.Equal("Resource3", resultDictionary["Product3"].Name);
-
-                var resourceDictionary = new Dictionary<string, FlattenedProduct>();
-                resourceDictionary.Add("Resource1", new FlattenedProduct
-                {
-                    Location = "West US",
-                    Tags = new Dictionary<string, string>()
-                    {
-                        {"tag1", "value1"},
-                        {"tag2", "value3"}
-                    },
-                    Pname = "Product1",
-                    FlattenedProductType = "Flat"
-                });
-                resourceDictionary.Add("Resource2", new FlattenedProduct
-                {
-                    Location = "Building 44",
-                    Pname = "Product2",
-                    FlattenedProductType = "Flat"
-                });
-
-                client.PutDictionary(resourceDictionary);
-            }
-        }
-
-        [Fact]
-        public void ResourceFlatteningComplexObjectTests()
-        {
-            using (
-                var client = new AutoRestResourceFlatteningTestService(Fixture.Uri,
-                    new TokenCredentials(Guid.NewGuid().ToString())))
-            {
-                //ResourceCollection
-                var resultResource = client.GetResourceCollection();
-
-                //Dictionaryofresources
-                Assert.Equal(3, resultResource.Dictionaryofresources.Count);
-                // Resource 1
-                Assert.Equal("1", resultResource.Dictionaryofresources["Product1"].Id);
-                Assert.Equal("OK", resultResource.Dictionaryofresources["Product1"].ProvisioningStateValues);
-                Assert.Equal("Product1", resultResource.Dictionaryofresources["Product1"].Pname);
-                Assert.Equal("Flat", resultResource.Dictionaryofresources["Product1"].FlattenedProductType);
-                Assert.Equal("Building 44", resultResource.Dictionaryofresources["Product1"].Location);
-                Assert.Equal("Resource1", resultResource.Dictionaryofresources["Product1"].Name);
-                Assert.Equal("Succeeded", resultResource.Dictionaryofresources["Product1"].ProvisioningState);
-                Assert.Equal("Microsoft.Web/sites", resultResource.Dictionaryofresources["Product1"].Type);
-                Assert.Equal("value1", resultResource.Dictionaryofresources["Product1"].Tags["tag1"]);
-                Assert.Equal("value3", resultResource.Dictionaryofresources["Product1"].Tags["tag2"]);
-                // Resource 2
-                Assert.Equal("2", resultResource.Dictionaryofresources["Product2"].Id);
-                Assert.Equal("Resource2", resultResource.Dictionaryofresources["Product2"].Name);
-                Assert.Equal("Building 44", resultResource.Dictionaryofresources["Product2"].Location);
-                // Resource 3
-                Assert.Equal("3", resultResource.Dictionaryofresources["Product3"].Id);
-                Assert.Equal("Resource3", resultResource.Dictionaryofresources["Product3"].Name);
-
-                //Arrayofresources
-                Assert.Equal(3, resultResource.Arrayofresources.Count);
-                // Resource 1
-                Assert.Equal("4", resultResource.Arrayofresources[0].Id);
-                Assert.Equal("OK", resultResource.Arrayofresources[0].ProvisioningStateValues);
-                Assert.Equal("Product4", resultResource.Arrayofresources[0].Pname);
-                Assert.Equal("Flat", resultResource.Arrayofresources[0].FlattenedProductType);
-                Assert.Equal("Building 44", resultResource.Arrayofresources[0].Location);
-                Assert.Equal("Resource4", resultResource.Arrayofresources[0].Name);
-                Assert.Equal("Succeeded", resultResource.Arrayofresources[0].ProvisioningState);
-                Assert.Equal("Microsoft.Web/sites", resultResource.Arrayofresources[0].Type);
-                Assert.Equal("value1", resultResource.Arrayofresources[0].Tags["tag1"]);
-                Assert.Equal("value3", resultResource.Arrayofresources[0].Tags["tag2"]);
-                // Resource 2
-                Assert.Equal("5", resultResource.Arrayofresources[1].Id);
-                Assert.Equal("Resource5", resultResource.Arrayofresources[1].Name);
-                Assert.Equal("Building 44", resultResource.Arrayofresources[1].Location);
-                // Resource 3
-                Assert.Equal("6", resultResource.Arrayofresources[2].Id);
-                Assert.Equal("Resource6", resultResource.Arrayofresources[2].Name);
-
-                //productresource
-                Assert.Equal("7", resultResource.Productresource.Id);
-                Assert.Equal("Resource7", resultResource.Productresource.Name);
-
-                var resourceDictionary = new Dictionary<string, FlattenedProduct>();
-                resourceDictionary.Add("Resource1", new FlattenedProduct
-                {
-                    Location = "West US",
-                    Tags = new Dictionary<string, string>()
-                    {
-                        {"tag1", "value1"},
-                        {"tag2", "value3"}
-                    },
-                    Pname = "Product1",
-                    FlattenedProductType = "Flat"
-                });
-                resourceDictionary.Add("Resource2", new FlattenedProduct
-                {
-                    Location = "Building 44",
-                    Pname = "Product2",
-                    FlattenedProductType = "Flat"
-                });
-
-                var resourceComplexObject = new ResourceCollection()
-                {
-                    Dictionaryofresources = resourceDictionary,
-                    Arrayofresources = new List<FlattenedProduct>()
-                    {
-                        new FlattenedProduct()
-                        {
-                            Location = "West US",
-                            Tags = new Dictionary<string, string>()
-                            {
-                                {"tag1", "value1"},
-                                {"tag2", "value3"}
-                            },
-                            Pname = "Product1",
-                            FlattenedProductType = "Flat"
-                        },
-                        new FlattenedProduct()
-                        {
-                            Location = "East US",
-                            Pname = "Product2",
-                            FlattenedProductType = "Flat"
-                        }
-                    },
-                    Productresource = new FlattenedProduct()
-                    {
-                        Location = "India",
-                        Pname = "Azure",
-                        FlattenedProductType = "Flat"
-                    }
-                };
-                client.PutResourceCollection(resourceComplexObject);
-            }
-        }
-
-        [Fact]
         public void AzureSpecialParametersTests()
         {
             var validSubscription = "1234-5678-9012-3456";
-            var validApiVersion = "2.0";
             var unencodedPath = "path1/path2/path3";
             var unencodedQuery = "value1&q2=value2&q3=value3";
             SwaggerSpecRunner.RunTests(
@@ -657,17 +497,17 @@ namespace Microsoft.Rest.Generator.CSharp.Azure.Tests
                 client.ApiVersionDefault.GetMethodGlobalValid();
                 client.ApiVersionDefault.GetPathGlobalValid();
                 client.ApiVersionDefault.GetSwaggerGlobalValid();
-                client.ApiVersionLocal.GetMethodLocalValid(validApiVersion);
+                client.ApiVersionLocal.GetMethodLocalValid();
                 client.ApiVersionLocal.GetMethodLocalNull(null);
-                client.ApiVersionLocal.GetPathLocalValid(validApiVersion);
-                client.ApiVersionLocal.GetSwaggerLocalValid(validApiVersion);
+                client.ApiVersionLocal.GetPathLocalValid();
+                client.ApiVersionLocal.GetSwaggerLocalValid();
 
                 client.SkipUrlEncoding.GetMethodPathValid(unencodedPath);
                 client.SkipUrlEncoding.GetPathPathValid(unencodedPath);
-                client.SkipUrlEncoding.GetSwaggerPathValid(unencodedPath);
+                client.SkipUrlEncoding.GetSwaggerPathValid();
                 client.SkipUrlEncoding.GetMethodQueryValid(unencodedQuery);
                 client.SkipUrlEncoding.GetPathQueryValid(unencodedQuery);
-                client.SkipUrlEncoding.GetSwaggerQueryValid(unencodedQuery);
+                client.SkipUrlEncoding.GetSwaggerQueryValid();
                 client.SkipUrlEncoding.GetMethodQueryNull();
                 client.SkipUrlEncoding.GetMethodQueryNull(null);
             }
@@ -803,11 +643,6 @@ namespace Microsoft.Rest.Generator.CSharp.Azure.Tests
 
                 client.ParameterGrouping.PostRequired(requiredParameters);
 
-                //Required parameters object is not null, but a required property of the object is
-                requiredParameters = new ParameterGroupingPostRequiredParameters(null, pathParameter);
-
-                Assert.Throws<ValidationException>(() => client.ParameterGrouping.PostRequired(requiredParameters));
-
                 //null required parameters
                 Assert.Throws<ValidationException>(() => client.ParameterGrouping.PostRequired(null));
 
@@ -829,25 +664,25 @@ namespace Microsoft.Rest.Generator.CSharp.Azure.Tests
                     HeaderOne = headerParameter,
                     QueryOne = queryParameter
                 };
-                var secondGroup = new ParameterGroupingPostMultipleParameterGroupsSecondParameterGroup
+                var secondGroup = new ParameterGroupingPostMultiParamGroupsSecondParamGroup
                 {
                     HeaderTwo = "header2",
                     QueryTwo = 42
                 };
 
-                client.ParameterGrouping.PostMultipleParameterGroups(firstGroup, secondGroup);
+                client.ParameterGrouping.PostMultiParamGroups(firstGroup, secondGroup);
 
                 //Multiple grouped parameters -- some optional parameters omitted
                 firstGroup = new FirstParameterGroup
                 {
                     HeaderOne = headerParameter
                 };
-                secondGroup = new ParameterGroupingPostMultipleParameterGroupsSecondParameterGroup
+                secondGroup = new ParameterGroupingPostMultiParamGroupsSecondParamGroup
                 {
                     QueryTwo = 42
                 };
 
-                client.ParameterGrouping.PostMultipleParameterGroups(firstGroup, secondGroup);
+                client.ParameterGrouping.PostMultiParamGroups(firstGroup, secondGroup);
 
                 client.ParameterGrouping.PostSharedParameterGroupObject(firstGroup);
             }

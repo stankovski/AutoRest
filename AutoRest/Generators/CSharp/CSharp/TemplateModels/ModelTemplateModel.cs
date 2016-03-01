@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Rest.Generator.ClientModel;
-using Microsoft.Rest.Generator.CSharp.TemplateModels;
 using Microsoft.Rest.Generator.Utilities;
 
 namespace Microsoft.Rest.Generator.CSharp
@@ -47,6 +46,14 @@ namespace Microsoft.Rest.Generator.CSharp
             get
             {
                 return this.IsPolymorphicType && Name != SerializedName;
+            }
+        }
+
+        public bool NeedsTransformationConverter
+        {
+            get
+            {
+                return this.Properties.Any(p => p.WasFlattened());
             }
         }
 
@@ -170,7 +177,7 @@ namespace Microsoft.Rest.Generator.CSharp
             private static string CreateSignature(IEnumerable<ConstructorParameterModel> parameters)
             {
                 var declarations = new List<string>();
-                foreach (var property in parameters.Select(p => p.UnderlyingProperty))
+                foreach (var property in parameters.Where(p => !p.UnderlyingProperty.IsConstant).Select(p => p.UnderlyingProperty))
                 {
                     string format = (property.IsRequired ? "{0} {1}" : "{0} {1} = default({0})");
                     declarations.Add(string.Format(CultureInfo.InvariantCulture,

@@ -1,9 +1,5 @@
 language: csharp
-sudo: required
-dist: trusty
-env:
-  matrix:
-  - DNX_VERSION=1.0.0-rc1-final DNX_USER_HOME=~/.dnx
+sudo: false
 mono:
 - beta
 os:
@@ -11,6 +7,8 @@ os:
 - osx
 addons:
   apt:
+    sources:
+    - deadsnakes
     packages:
     # Packages required for android build
     - libc6-i386
@@ -18,6 +16,8 @@ addons:
     - lib32gcc1
     - lib32ncurses5
     - lib32z1
+    # packages for python
+    - python3.5
     # Packages for DNX 
     - gettext
     - libcurl4-openssl-dev
@@ -37,15 +37,19 @@ install:
   - npm install -g npm@'>=1.4.3'
   - npm install
   # Install ruby dependencies
-  - rvm use 2.2.1 --install --binary --fuzzy
+  - rvm use 2.3.0 --install --binary --fuzzy
   - gem install bundler
   - bundle install
+  - pip install --user tox
   # Install android SDK
   - mkdir android
   - wget -qO- "http://dl.google.com/android/android-sdk_r23.0.2-linux.tgz" | tar -zxv -C ./android
   - echo y | ./android/android-sdk-linux/tools/android update sdk --all --filter platform-tools,android-23,build-tools-23.0.1,extra-android-support,extra-android-m2repository,extra-google-m2repository --no-ui --force
   - export ANDROID_HOME=`pwd`/android/android-sdk-linux
 script:
+  - dnvm install 1.0.0-rc1-final -r mono
+  - dnvm install 1.0.0-rc1-final -r coreclr
+  - dnvm use 1.0.0-rc1-final -r coreclr -persistent
   - gulp
 after_script:
   - echo "========== Server log: ============"

@@ -18,8 +18,8 @@ import { ServiceClientOptions, RequestOptions, ServiceCallback, ServiceClientCre
 }
 @EmptyLine
 declare class @(Model.Name) {
-    @{var requiredParameters = Model.Properties.Where(p => p.IsRequired);}
-    @{var optionalParameters = Model.Properties.Where(p => !p.IsRequired);}
+    @{var requiredParameters = Model.Properties.Where(p => p.IsRequired && !p.IsConstant);}
+    @{var optionalParameters = Model.Properties.Where(p => !p.IsRequired && !p.IsConstant);}
     /**
      * @@class
      * Initializes a new instance of the @Model.Name class.
@@ -30,8 +30,13 @@ declare class @(Model.Name) {
     @: * @@param {@param.Type.Name.ToCamelCase()} @param.Name - @param.Documentation
     @: *
     }
-     * @@param {string} [baseUri] - The base URI of the service.
-     *
+
+@if(!Model.IsCustomBaseUri)
+{
+     @:* @@param {string} [baseUri] - The base URI of the service.
+     @:*
+}
+
      * @@param {object} [options] - The parameter options
      *
      * @@param {Array} [options.filters] - Filters to be added to the request pipeline

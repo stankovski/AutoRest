@@ -23,7 +23,10 @@ namespace Microsoft.Rest.Generator.NodeJS
                 .ForEach(m => MethodTemplateModels.Add(new MethodTemplateModel(m, serviceClient)));
 
             ModelTypes.ForEach(m => ModelTemplateModels.Add(new ModelTemplateModel(m, serviceClient)));
+            this.IsCustomBaseUri = serviceClient.Extensions.ContainsKey(Microsoft.Rest.Generator.Extensions.ParameterizedHostExtension);
         }
+
+        public bool IsCustomBaseUri { get; private set; }
 
         public List<MethodTemplateModel> MethodTemplateModels { get; private set; }
 
@@ -45,6 +48,15 @@ namespace Microsoft.Rest.Generator.NodeJS
                 }
                 return orderedList;
             }
+        }
+
+        public bool ContainsDurationProperty()
+        {
+            Property prop = Properties.FirstOrDefault(p =>
+                (p.Type is PrimaryType && (p.Type as PrimaryType).Type == KnownPrimaryType.TimeSpan) ||
+                (p.Type is SequenceType && (p.Type as SequenceType).ElementType.IsPrimaryType(KnownPrimaryType.TimeSpan)) ||
+                (p.Type is DictionaryType && (p.Type as DictionaryType).ValueType.IsPrimaryType(KnownPrimaryType.TimeSpan)));
+            return prop != null;
         }
 
         private void constructOrderedList(ModelTemplateModel model, List<ModelTemplateModel> orderedList)
@@ -98,10 +110,30 @@ namespace Microsoft.Rest.Generator.NodeJS
 
                 for (int i = 0; i < polymorphicTypes.Count(); i++ )
                 {
-                    builder.Append(string.Format(CultureInfo.InvariantCulture, 
+                    string discriminatorField = polymorphicTypes.ElementAt(i).SerializedName;
+                    var polymorphicType = polymorphicTypes.ElementAt(i) as CompositeType;
+                    if (polymorphicType.BaseModelType != null)
+                    {
+                        while (polymorphicType.BaseModelType != null)
+                        {
+                            polymorphicType = polymorphicType.BaseModelType;
+                        }
+                        discriminatorField = string.Format(CultureInfo.InvariantCulture, "{0}.{1}",
+                            polymorphicType.Name,
+                            polymorphicTypes.ElementAt(i).SerializedName);
+                        builder.Append(string.Format(CultureInfo.InvariantCulture,
                         "'{0}' : exports.{1}",
-                            polymorphicTypes.ElementAt(i).SerializedName, 
+                            discriminatorField,
                             polymorphicTypes.ElementAt(i).Name));
+                    }
+                    else
+                    {
+                        builder.Append(string.Format(CultureInfo.InvariantCulture,
+                        "'{0}' : exports.{1}",
+                            discriminatorField,
+                            polymorphicTypes.ElementAt(i).Name));
+                    }
+                    
 
                     if(i == polymorphicTypes.Count() -1)
                     {
@@ -122,9 +154,13 @@ namespace Microsoft.Rest.Generator.NodeJS
             get
             {
                 var requireParams = new List<string>();
-                this.Properties.Where(p => p.IsRequired)
+                this.Properties.Where(p => p.IsRequired && !p.IsConstant)
                     .ForEach(p => requireParams.Add(p.Name.ToCamelCase()));
-                requireParams.Add("baseUri");
+                if (!IsCustomBaseUri)
+                {
+                    requireParams.Add("baseUri");
+                }
+
                 return string.Join(", ", requireParams);
             }
         }
@@ -138,7 +174,7 @@ namespace Microsoft.Rest.Generator.NodeJS
 
                 bool first = true;
                 foreach (var p in this.Properties) {
-                    if (! p.IsRequired)
+                    if (!p.IsRequired || p.IsConstant)
                         continue;
 
                     if (!first)
@@ -151,10 +187,14 @@ namespace Microsoft.Rest.Generator.NodeJS
                     first = false;
                 }
 
-                if (!first)
-                    requiredParams.Append(", ");
+                if (!IsCustomBaseUri)
+                {
+                    if (!first)
+                        requiredParams.Append(", ");
 
-                requiredParams.Append("baseUri: string");
+                    requiredParams.Append("baseUri: string");
+                }
+
                 return requiredParams.ToString();
             }
         }
@@ -164,7 +204,7 @@ namespace Microsoft.Rest.Generator.NodeJS
             get
             {
                 return this.Methods.FirstOrDefault(
-                    m => m.Parameters.FirstOrDefault(p => p.Type == PrimaryType.TimeSpan) != null) != null;
+                    m => m.Parameters.FirstOrDefault(p => p.Type.IsPrimaryType(KnownPrimaryType.TimeSpan)) != null) != null;
             }
         }
     }

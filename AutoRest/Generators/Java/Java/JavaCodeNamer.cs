@@ -76,6 +76,18 @@ namespace Microsoft.Rest.Generator.Java
             }.ForEach(s => PrimaryTypes.Add(s));
         }
 
+        /// <summary>
+        /// Skips name collision resolution for method groups (operations) as they get
+        /// renamed in template models.
+        /// </summary>
+        /// <param name="serviceClient"></param>
+        /// <param name="exclusionDictionary"></param>
+        protected override void ResolveMethodGroupNameCollision(ServiceClient serviceClient,
+            Dictionary<string, string> exclusionDictionary)
+        {
+            // Do nothing   
+        }
+
         public override string GetFieldName(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -147,7 +159,6 @@ namespace Microsoft.Rest.Generator.Java
                 {
                     method.Group = method.Group.ToCamelCase();
                 }
-                var scope = new ScopeProvider();
                 foreach (var parameter in method.Parameters)
                 {
                     if (parameter.ClientProperty != null)
@@ -156,10 +167,6 @@ namespace Microsoft.Rest.Generator.Java
                             "{0}.get{1}()",
                             method.Group == null ? "this" : "this.client",
                             parameter.ClientProperty.Name.ToPascalCase());
-                    }
-                    else
-                    {
-                        parameter.Name = scope.GetVariableName(parameter.Name);
                     }
 
                     if (!parameter.IsRequired)
@@ -183,7 +190,7 @@ namespace Microsoft.Rest.Generator.Java
             var enumType = type as EnumType;
             if (enumType != null && enumType.ModelAsString)
             {
-                type = PrimaryType.String;
+                type = new PrimaryType(KnownPrimaryType.String);
             }
 
             // Using Any instead of Contains since object hash is bound to a property which is modified during normalization
@@ -256,59 +263,64 @@ namespace Microsoft.Rest.Generator.Java
 
         private static PrimaryType NormalizePrimaryType(PrimaryType primaryType)
         {
-            if (primaryType == PrimaryType.Boolean)
+            if (primaryType == null)
+            {
+                throw new ArgumentNullException("primaryType");
+            }
+
+            if (primaryType.Type == KnownPrimaryType.Boolean)
             {
                 primaryType.Name = "boolean";
             }
-            else if (primaryType == PrimaryType.ByteArray)
+            else if (primaryType.Type == KnownPrimaryType.ByteArray)
             {
                 primaryType.Name = "byte[]";
             }
-            else if (primaryType == PrimaryType.Date)
+            else if (primaryType.Type == KnownPrimaryType.Date)
             {
                 primaryType.Name = "LocalDate";
             }
-            else if (primaryType == PrimaryType.DateTime)
+            else if (primaryType.Type == KnownPrimaryType.DateTime)
             {
                 primaryType.Name = "DateTime";
             }
-            else if (primaryType == PrimaryType.DateTimeRfc1123)
+            else if (primaryType.Type == KnownPrimaryType.DateTimeRfc1123)
             {
                 primaryType.Name = "DateTimeRfc1123";
             }
-            else if (primaryType == PrimaryType.Double)
+            else if (primaryType.Type == KnownPrimaryType.Double)
             {
                 primaryType.Name = "double";
             }
-            else if (primaryType == PrimaryType.Decimal)
+            else if (primaryType.Type == KnownPrimaryType.Decimal)
             {
                 primaryType.Name = "BigDecimal";
             }
-            else if (primaryType == PrimaryType.Int)
+            else if (primaryType.Type == KnownPrimaryType.Int)
             {
                 primaryType.Name = "int";
             }
-            else if (primaryType == PrimaryType.Long)
+            else if (primaryType.Type == KnownPrimaryType.Long)
             {
                 primaryType.Name = "long";
             }
-            else if (primaryType == PrimaryType.Stream)
+            else if (primaryType.Type == KnownPrimaryType.Stream)
             {
                 primaryType.Name = "InputStream";
             }
-            else if (primaryType == PrimaryType.String)
+            else if (primaryType.Type == KnownPrimaryType.String)
             {
                 primaryType.Name = "String";
             }
-            else if (primaryType == PrimaryType.TimeSpan)
+            else if (primaryType.Type == KnownPrimaryType.TimeSpan)
             {
                 primaryType.Name = "Period";
             }
-            else if (primaryType == PrimaryType.Object)
+            else if (primaryType.Type == KnownPrimaryType.Object)
             {
                 primaryType.Name = "Object";
             }
-            else if (primaryType == PrimaryType.Credentials)
+            else if (primaryType.Type == KnownPrimaryType.Credentials)
             {
                 primaryType.Name = "ServiceClientCredentials";
             }
@@ -318,9 +330,9 @@ namespace Microsoft.Rest.Generator.Java
 
         public static IType WrapPrimitiveType(IType type)
         {
-            if (type is PrimaryType)
+            var primaryType = type as PrimaryType;
+            if (primaryType != null)
             {
-                var primaryType = new PrimaryType();
                 if (type.Name == "boolean")
                 {
                     primaryType.Name = "Boolean";
@@ -337,17 +349,15 @@ namespace Microsoft.Rest.Generator.Java
                 {
                     primaryType.Name = "Long";
                 }
-                else
-                {
-                    return type;
-                }
+
                 return primaryType;
             }
             else if (type == null)
             {
-                var newType = new PrimaryType();
-                newType.Name = "Void";
-                return newType;
+                return new PrimaryType(KnownPrimaryType.None)
+                {
+                    Name = "Void"
+                };
             }
             else
             {
@@ -376,32 +386,32 @@ namespace Microsoft.Rest.Generator.Java
                 return null;
             }
 
-            if (primaryType == PrimaryType.Date ||
+            if (primaryType.Type == KnownPrimaryType.Date ||
                 primaryType.Name == "LocalDate")
             {
                 return "org.joda.time.LocalDate";
             }
-            else if (primaryType == PrimaryType.DateTime || 
+            else if (primaryType.Type == KnownPrimaryType.DateTime || 
                 primaryType.Name == "DateTime")
             {
                 return "org.joda.time.DateTime";
             }
-            else if (primaryType == PrimaryType.Decimal ||
+            else if (primaryType.Type == KnownPrimaryType.Decimal ||
                 primaryType.Name == "Decimal")
             {
                 return "java.math.BigDecimal";
             }
-            else if (primaryType == PrimaryType.DateTimeRfc1123 ||
+            else if (primaryType.Type == KnownPrimaryType.DateTimeRfc1123 ||
                primaryType.Name == "DateTimeRfc1123")
             {
                 return "com.microsoft.rest.DateTimeRfc1123";
             }
-            else if (primaryType == PrimaryType.Stream ||
+            else if (primaryType.Type == KnownPrimaryType.Stream ||
                 primaryType.Name == "InputStream")
             {
                 return "java.io.InputStream";
             }
-            else if (primaryType == PrimaryType.TimeSpan ||
+            else if (primaryType.Type == KnownPrimaryType.TimeSpan ||
                 primaryType.Name == "Period")
             {
                 return "org.joda.time.Period";
@@ -431,6 +441,45 @@ namespace Microsoft.Rest.Generator.Java
                     return serviceClient.Namespace.ToLower(CultureInfo.InvariantCulture)
                         + ".models." + exception;
             }
+        }
+
+        public override string EscapeDefaultValue(string defaultValue, IType type)
+        {
+            if (type == null)
+            {
+                throw new ArgumentNullException("type");
+            }
+
+            var primaryType = type as PrimaryType;
+            if (defaultValue != null && primaryType != null)
+            {
+                if (primaryType.Type == KnownPrimaryType.String)
+                {
+                    return CodeNamer.QuoteValue(defaultValue);
+                }
+                else if (primaryType.Type == KnownPrimaryType.Boolean)
+                {
+                    return defaultValue.ToLowerInvariant();
+                }
+                else
+                {
+                    if (primaryType.Type == KnownPrimaryType.Date ||
+                        primaryType.Type == KnownPrimaryType.DateTime ||
+                        primaryType.Type == KnownPrimaryType.DateTimeRfc1123)
+                    {
+                        return "DateTime.parse(\"" + defaultValue + "\")";
+                    }
+                    else if (primaryType.Type == KnownPrimaryType.TimeSpan)
+                    {
+                        return "Period.parse(\"" + defaultValue + "\")";
+                    }
+                    else if (primaryType.Type == KnownPrimaryType.ByteArray)
+                    {
+                        return "\"" + defaultValue + "\".getBytes()";
+                    }
+                }
+            }
+            return defaultValue;
         }
     }
 }

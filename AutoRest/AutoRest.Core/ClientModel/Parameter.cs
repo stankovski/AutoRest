@@ -1,15 +1,17 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
+using Microsoft.Rest.Generator.Utilities;
 
 namespace Microsoft.Rest.Generator.ClientModel
 {
     /// <summary>
     /// Defines an HTTP method parameter.
     /// </summary>
-    public class Parameter
+    public class Parameter : IParameter
     {
         /// <summary>
         /// Creates a new instance of Parameter class.
@@ -45,6 +47,11 @@ namespace Microsoft.Rest.Generator.ClientModel
         /// Indicates whether the parameter is required.
         /// </summary>
         public bool IsRequired { get; set; }
+
+        /// <summary>
+        /// Indicates whether the parameter value is constant. If true, default value can not be null.
+        /// </summary>
+        public bool IsConstant { get; set; }
 
         /// <summary>
         /// Reference to the global Property that provides value for the parameter.
@@ -93,7 +100,8 @@ namespace Microsoft.Rest.Generator.ClientModel
         /// <returns>A deep clone of current object.</returns>
         public object Clone()
         {
-            Parameter param = (Parameter)this.MemberwiseClone();
+            Parameter param = new Parameter();
+            param.LoadFrom(this);
             return param;
         }
     }

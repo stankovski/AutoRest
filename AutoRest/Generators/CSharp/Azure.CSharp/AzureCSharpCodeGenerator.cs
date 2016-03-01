@@ -18,7 +18,7 @@ namespace Microsoft.Rest.Generator.CSharp.Azure
     {
         private readonly AzureCSharpCodeNamer _namer;
 
-        private const string ClientRuntimePackage = "Microsoft.Rest.ClientRuntime.Azure.3.0.1";
+        private const string ClientRuntimePackage = "Microsoft.Rest.ClientRuntime.Azure.3.1.0";
 
         // page extensions class dictionary.
         private IDictionary<KeyValuePair<string, string>, string> pageClasses;
@@ -37,7 +37,7 @@ namespace Microsoft.Rest.Generator.CSharp.Azure
 
         public override string Description
         {
-            get { return "C# for Http Client Libraries"; }
+            get { return "Azure specific C# code generator."; }
         }
 
         public override string UsageInstructions

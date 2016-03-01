@@ -1,15 +1,17 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
+using Microsoft.Rest.Generator.Utilities;
 
 namespace Microsoft.Rest.Generator.ClientModel
 {
     /// <summary>
     /// Defines model properties.
     /// </summary>
-    public class Property
+    public class Property : IParameter
     {
         /// <summary>
         /// Creates a new instance of Property class.
@@ -51,6 +53,11 @@ namespace Microsoft.Rest.Generator.ClientModel
         public bool IsRequired { get; set; }
 
         /// <summary>
+        /// Indicates whether the parameter value is constant. If true, default value can not be null.
+        /// </summary>
+        public bool IsConstant { get; set; }
+
+        /// <summary>
         /// Gets or sets the constraints.
         /// </summary>
         public Dictionary<Constraint, string> Constraints { get; private set; }
@@ -64,6 +71,11 @@ namespace Microsoft.Rest.Generator.ClientModel
         /// Gets vendor extensions dictionary.
         /// </summary>
         public Dictionary<string, object> Extensions { get; private set; }
+
+        /// <summary>
+        /// Gets or sets collection format for array parameters.
+        /// </summary>
+        public CollectionFormat CollectionFormat { get; set; }
 
         /// <summary>
         /// Returns a string representation of the Property object.
@@ -82,7 +94,10 @@ namespace Microsoft.Rest.Generator.ClientModel
         /// <returns>A deep clone of current object.</returns>
         public object Clone()
         {
-            var property = (Property) this.MemberwiseClone();
+            Property property = new Property();
+            property.LoadFrom(this);
+            property.Constraints = new Dictionary<Constraint, string>(this.Constraints);
+            property.Extensions = new Dictionary<string, object>(this.Extensions);
             return property;
         }
     }

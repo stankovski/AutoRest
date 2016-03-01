@@ -1,0 +1,17 @@
+﻿@using Microsoft.Rest.Generator.Python
+@using Microsoft.Rest.Generator.Python.Templates
+@using Microsoft.Rest.Generator.Python.TemplateModels
+@using Microsoft.Rest.Generator.Utilities
+@using System.Linq
+@inherits Microsoft.Rest.Generator.Template<Microsoft.Rest.Generator.Python.ServiceClientTemplateModel>
+# coding=utf-8
+# --------------------------------------------------------------------------
+@Header("# ").TrimMultilineHeader()
+# --------------------------------------------------------------------------
+@EmptyLine
+from .@(Model.Name.ToPythonCase()) import @(Model.Name), @(Model.Name)Configuration
+@EmptyLine
+__all__ = [
+    '@(Model.Name)',
+    '@(Model.Name)Configuration'
+]

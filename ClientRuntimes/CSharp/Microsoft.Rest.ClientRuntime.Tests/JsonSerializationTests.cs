@@ -12,9 +12,11 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using Xunit;
+using System.Collections.Generic;
 
 namespace Microsoft.Rest.ClientRuntime.Tests
 {
+    [Collection("Serialization Tests")]
     public class JsonSerializationTests
     {
         private const string JsonErrorMessage = "Inappropriate use of JsonConvert.DefaultSettings detected!";
@@ -310,7 +312,27 @@ namespace Microsoft.Rest.ClientRuntime.Tests
                 Assert.Equal(5, model.Rating); 
             });
         }
-        
+
+        [Fact]
+        public void SerializeConstants()
+        {
+            var settings = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+                DateFormatHandling = DateFormatHandling.IsoDateFormat,
+                DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+                NullValueHandling = NullValueHandling.Ignore,
+                ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
+                ContractResolver = new ReadOnlyJsonContractResolver(),
+                Converters = new List<JsonConverter>
+                    {
+                        new Iso8601TimeSpanConverter()
+                    }
+            };
+            var json = SafeJsonConvert.SerializeObject(new ModelWithConst(), settings);
+            Assert.Contains("foo", json);
+        }
+
         private static void TestWithBadJsonSerializerSettings(Action callback)
         {
             Func<JsonSerializerSettings> oldDefault = JsonConvert.DefaultSettings;
@@ -335,6 +357,14 @@ namespace Microsoft.Rest.ClientRuntime.Tests
         {
             public string Name { get; set; }
             
+            public int Rating { get; set; }
+        }
+
+        private class ModelWithConst
+        {
+            [JsonProperty("name", DefaultValueHandling = DefaultValueHandling.Include)]
+            public static string Name { get { return "foo"; } }
+
             public int Rating { get; set; }
         }
 

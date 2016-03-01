@@ -16,8 +16,6 @@ namespace Microsoft.Rest.Generator.NodeJS
 {
     public class MethodTemplateModel : Method
     {
-        private readonly IScopeProvider _scopeProvider = new ScopeProvider();
-
         public MethodTemplateModel(Method source, ServiceClient serviceClient)
         {
             this.LoadFrom(source);
@@ -82,7 +80,7 @@ namespace Microsoft.Rest.Generator.NodeJS
                 Name = "customHeaders",
                 IsRequired = false,
                 Documentation = "Headers that will be added to the request",
-                Type = PrimaryType.Object,
+                Type = new PrimaryType(KnownPrimaryType.Object),
                 SerializedName = "customHeaders"
             };
             ((CompositeType)optionsParmeter.Type).Properties.Add(customHeaders);
@@ -98,12 +96,6 @@ namespace Microsoft.Rest.Generator.NodeJS
         public ParameterTemplateModel OptionsParameterTemplateModel { get; private set; }
 
         protected List<ParameterTemplateModel> GroupedParameterTemplateModels { get; private set; }
-
-        public IScopeProvider Scope
-        {
-            get { return _scopeProvider; }
-        }
-
 
         /// <summary>
         /// Get the predicate to determine of the http operation status code indicates success
@@ -167,7 +159,7 @@ namespace Microsoft.Rest.Generator.NodeJS
 
                 // For date/datetime parameters, use a union type to reflect that they can be passed as a JS Date or a string.
                 var type = parameter.Type;
-                if (type == PrimaryType.Date || type == PrimaryType.DateTime)
+                if (type.IsPrimaryType(KnownPrimaryType.Date) || type.IsPrimaryType(KnownPrimaryType.DateTime))
                     declarations.Append("Date|string");
                 else declarations.Append(type.TSType(false));
 
@@ -237,14 +229,14 @@ namespace Microsoft.Rest.Generator.NodeJS
 
         /// <summary>
         /// Get the parameters that are actually method parameters in the order they appear in the method signature
-        /// exclude global parameters.
+        /// exclude global parameters and constants.
         /// </summary>
         internal IEnumerable<ParameterTemplateModel> LocalParameters
         {
             get
             {
                 return ParameterTemplateModels.Where(
-                    p => p != null && p.ClientProperty == null && !string.IsNullOrWhiteSpace(p.Name))
+                    p => p != null && p.ClientProperty == null && !string.IsNullOrWhiteSpace(p.Name) && !p.IsConstant)
                     .OrderBy(item => !item.IsRequired);
             }
         }
@@ -295,7 +287,7 @@ namespace Microsoft.Rest.Generator.NodeJS
                             traversalStack.Push(param);
                             foreach (var property in param.ComposedProperties)
                             {
-                                if (property.IsReadOnly)
+                                if (property.IsReadOnly || property.IsConstant)
                                 {
                                     continue;
                                 }
@@ -355,7 +347,7 @@ namespace Microsoft.Rest.Generator.NodeJS
             get
             {
                 var builder = new IndentedStringBuilder("  ");
-                var errorVariable = this.Scope.GetVariableName("deserializationError");
+                var errorVariable = this.Scope.GetUniqueName("deserializationError");
                 return builder.AppendLine("var {0} = new Error(util.format('Error \"%s\" occurred in " +
                     "deserializing the responseBody - \"%s\"', error, responseBody));", errorVariable)
                     .AppendLine("{0}.request = msRest.stripRequest(httpRequest);", errorVariable)
@@ -393,7 +385,7 @@ namespace Microsoft.Rest.Generator.NodeJS
             {
                 throw new ArgumentNullException("parameter");
             }
-            string typeName = PrimaryType.Object.Name;
+            string typeName = "object";
             if (parameter.Type is PrimaryType)
             {
                 typeName = parameter.Type.Name;
@@ -404,7 +396,7 @@ namespace Microsoft.Rest.Generator.NodeJS
             }
             else if (parameter.Type is EnumType)
             {
-                typeName = PrimaryType.String.Name;
+                typeName = "string";
             }
 
             return typeName.ToLower(CultureInfo.InvariantCulture);
@@ -419,7 +411,7 @@ namespace Microsoft.Rest.Generator.NodeJS
             }
             else
             {
-                builder.AppendLine("var resultMapper = {{{0}}};", type.ConstructMapper(responseVariable));
+                builder.AppendLine("var resultMapper = {{{0}}};", type.ConstructMapper(responseVariable, null, false, false));
             }
             builder.AppendLine("{1} = client.deserialize(resultMapper, {0}, '{1}');", responseVariable, valueReference);
             return builder.ToString();
@@ -430,7 +422,7 @@ namespace Microsoft.Rest.Generator.NodeJS
             get
             {
                 var builder = new IndentedStringBuilder("  ");
-                foreach (var parameter in ParameterTemplateModels)
+                foreach (var parameter in ParameterTemplateModels.Where(p => !p.IsConstant))
                 {
                     if ((HttpMethod == HttpMethod.Patch && parameter.Type is CompositeType))
                     {
@@ -653,8 +645,7 @@ namespace Microsoft.Rest.Generator.NodeJS
                 else
                 {
                     builder.AppendLine("var requestModelMapper = {{{0}}};",
-                        RequestBody.Type.ConstructMapper(RequestBody.SerializedName, RequestBody.IsRequired,
-                        RequestBody.Constraints, RequestBody.DefaultValue));
+                        RequestBody.Type.ConstructMapper(RequestBody.SerializedName, RequestBody, false, false));
                 }
                 return builder.ToString();
             }
@@ -725,11 +716,7 @@ namespace Microsoft.Rest.Generator.NodeJS
                 }
                 else if (returnBodyType is EnumType)
                 {
-                    typeName = PrimaryType.String.Name;
-                }
-                else if (returnBodyType is CompositeType || returnBodyType is DictionaryType)
-                {
-                    typeName = PrimaryType.Object.Name;
+                    typeName = "string";
                 }
 
                 return typeName.ToLower(CultureInfo.InvariantCulture);
@@ -894,11 +881,6 @@ namespace Microsoft.Rest.Generator.NodeJS
                 if (!string.IsNullOrWhiteSpace(optionalParam.DefaultValue))
                 {
                     defaultValue = optionalParam.DefaultValue;
-                    if (optionalParam.Type == PrimaryType.String || optionalParam.Type is EnumType)
-                    {
-                        defaultValue = string.Format(CultureInfo.InvariantCulture, 
-                            "'{0}'", optionalParam.DefaultValue);
-                    }
                 }
                 builder.AppendLine("var {0} = ({1} && {1}.{2} !== undefined) ? {1}.{2} : {3};", 
                     optionalParam.Name, OptionsParameterTemplateModel.Name, optionalParam.Name, defaultValue);

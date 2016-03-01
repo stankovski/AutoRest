@@ -50,10 +50,31 @@
   if (!callback) {
     throw new Error('callback cannot be null.');
   }
+
   @if (((CompositeType)Model.OptionsParameterTemplateModel.Type).Properties.Count > 1)
   {
   @:@(Model.BuildOptionalMappings())
   }
+
+  @foreach(var parameter in Model.ParameterTemplateModels)
+  {
+    if (parameter.IsConstant && parameter.ClientProperty == null)
+    {
+  @:var @(parameter.Name) = @(parameter.DefaultValue);
+    }
+
+    if (parameter.Type is CompositeType
+      && !parameter.IsConstant
+      && parameter.ClientProperty == null
+      && ((CompositeType)parameter.Type).ComposedProperties.Any(p => p.IsConstant))
+    {
+  @:if (@(parameter.Name) === null || @(parameter.Name) === undefined)
+  @:{
+  @:  @(parameter.Name) = {};
+  @:}
+    }
+  }
+
   @if (Model.ParameterTemplateModels.Any())
   {
       var validationBlock = Model.ValidationString;
@@ -109,7 +130,7 @@
 
   @if (Model.RequestBody != null)
   {
-      if (Model.RequestBody.Type == PrimaryType.Stream)
+      if (Model.RequestBody.Type.IsPrimaryType(KnownPrimaryType.Stream))
       {
   <text>
   // Serialize Request  
@@ -136,9 +157,6 @@
   }
 
   httpRequest.body = requestContent;
-  httpRequest.headers['Content-Length'] = Buffer.isBuffer(requestContent) ? 
-                                                    requestContent.length : 
-                                  Buffer.byteLength(requestContent, 'UTF8');
   </text>
       }
   }
@@ -150,7 +168,7 @@
       @foreach (var parameter in Model.LogicalParameters.Where(p => p.Location == ParameterLocation.FormData))
       {
   @:if (@(parameter.Name) !== undefined && @(parameter.Name) !== null) {
-          if (parameter.Type == PrimaryType.Stream)
+          if (parameter.Type.IsPrimaryType(KnownPrimaryType.Stream))
           {  
     @:formData['@(parameter.SerializedName)'] = @(parameter.Name);  
           }
@@ -167,11 +185,10 @@
   {
   <text>
   httpRequest.body = null;
-  httpRequest.headers['Content-Length'] = 0;
   </text>
   }
 
-  @if (Model.Responses.Any(r => r.Value.Body == PrimaryType.Stream))
+  @if (Model.Responses.Any(r => r.Value.Body.IsPrimaryType(KnownPrimaryType.Stream)))
   {
 @:  @Include(new MethodStreamPipelineTemplate(), Model)
   }

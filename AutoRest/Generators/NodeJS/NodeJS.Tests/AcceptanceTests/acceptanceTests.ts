@@ -17,6 +17,7 @@ import stream = require('stream');
 import boolClient = require('../Expected/AcceptanceTests/BodyBoolean/autoRestBoolTestService');
 import stringClient = require('../Expected/AcceptanceTests/BodyString/autoRestSwaggerBATService');
 import integerClient = require('../Expected/AcceptanceTests/BodyInteger/autoRestIntegerTestService');
+import compositeBoolIntClient = require('../Expected/AcceptanceTests/CompositeBoolIntClient/compositeBoolInt');
 import numberClient = require('../Expected/AcceptanceTests/BodyNumber/autoRestNumberTestService');
 import byteClient = require('../Expected/AcceptanceTests/BodyByte/autoRestSwaggerBATByteService');
 import dateClient = require('../Expected/AcceptanceTests/BodyDate/autoRestDateTestService');
@@ -30,6 +31,7 @@ import dictionaryClient = require('../Expected/AcceptanceTests/BodyDictionary/au
 import dictionaryModels = require('../Expected/AcceptanceTests/BodyDictionary/models');
 import httpClient = require('../Expected/AcceptanceTests/Http/autoRestHttpInfrastructureTestService');
 import formDataClient = require('../Expected/AcceptanceTests/BodyFormData/autoRestSwaggerBATFormDataService');
+import customBaseUriClient = require('../Expected/AcceptanceTests/CustomBaseUri/autoRestParameterizedHostTestClient');
 
 
 var dummyToken = 'dummy12321343423';
@@ -51,7 +53,33 @@ var baseUri = 'http://localhost:3000';
 describe('nodejs', function () {
 
   describe('Swagger BAT', function () {
-    
+    describe('Custom BaseUri Client', function () {
+      var testClient = new customBaseUriClient('host:3000', clientOptions);
+      it('should return 200', function (done) {
+          testClient.paths.getEmpty('local', function (error, result, request, response) {
+          should.not.exist(error);
+          response.statusCode.should.equal(200);
+          done();
+        });
+      });
+      it('should throw due to bad "host", bad "account" and missing account', function (done) {
+        testClient.host = 'nonexistent';
+        testClient.paths.getEmpty('local', function (error, result, request, response) {
+          should.exist(error);
+          should.not.exist(result);
+          testClient.host = 'host:3000';
+          testClient.paths.getEmpty('bad', function (error, result, request, response) {
+            should.exist(error);
+            should.not.exist(result);
+            testClient.paths.getEmpty(null, function (error, result, request, response) {
+              should.exist(error);
+              should.not.exist(result);
+              done();
+            });
+          });
+        });
+      });
+    });
     describe('Bool Client', function () {
       var testClient = new boolClient(baseUri, clientOptions);
       it('should get valid boolean values', function (done) {
@@ -90,6 +118,97 @@ describe('nodejs', function () {
 
     describe('Integer Client', function () {
       var testClient = new integerClient(baseUri, clientOptions);
+      it('should put max value for 32 and 64 bit Integers', function (done) {
+        testClient.intModel.putMax32((Math.pow(2, 32 - 1) - 1), function (error, result) {
+          should.not.exist(error);
+          testClient.intModel.putMax64(9223372036854776000, function (error, result) {
+            should.not.exist(error);
+            done();
+          });
+        });
+      });
+
+      it('should put min value for 32 and 64 bit Integers', function (done) {
+        testClient.intModel.putMin32(-Math.pow(2, 32 - 1), function (error, result) {
+          should.not.exist(error);
+          testClient.intModel.putMin64(-9223372036854776000, function (error, result) {
+            should.not.exist(error);
+            done();
+          });
+        });
+      });
+
+      it('should get null and invalid integer value', function (done) {
+        testClient.intModel.getNull(function (error, result) {
+          should.not.exist(result);
+          testClient.intModel.getInvalid(function (error, result) {
+            should.exist(error);
+            should.not.exist(result);
+            done();
+          });
+        });
+      });
+
+      it('should get overflow and underflow for 32 bit integer value', function (done) {
+        testClient.intModel.getOverflowInt32(function (error, result) {
+          should.not.exist(error);
+          result.should.equal(2147483656);
+          testClient.intModel.getUnderflowInt32(function (error, result) {
+            should.not.exist(error);
+            result.should.equal(-2147483656);
+            done();
+          });
+        });
+      });
+
+      it('should get overflow and underflow for 64 bit integer value', function (done) {
+        testClient.intModel.getOverflowInt64(function (error, result) {
+          should.not.exist(error);
+          result.should.equal(9223372036854775910);
+          testClient.intModel.getUnderflowInt64(function (error, result) {
+            should.not.exist(error);
+            result.should.equal(-9223372036854775910);
+            done();
+          });
+        });
+      });
+    });
+
+    describe('CompositeBoolInt Client', function () {
+      var testClient = new compositeBoolIntClient(baseUri, clientOptions);
+      it('should get valid boolean values', function (done) {
+        testClient.bool.getTrue(function (error, result) {
+          should.not.exist(error);
+          result.should.equal(true);
+          testClient.bool.getFalse(function (error, result) {
+            should.not.exist(error);
+            result.should.equal(false);
+            done();
+          });
+        });
+      });
+
+      it('should put valid boolean values', function (done) {
+        testClient.bool.putTrue(true, function (error, result) {
+          should.not.exist(error);
+          testClient.bool.putFalse(false, function (error, result) {
+            should.not.exist(error);
+            done();
+          });
+        });
+      });
+
+      it('should get null and invalid boolean value', function (done) {
+        testClient.bool.getNull(function (error, result) {
+          should.not.exist(result);
+          testClient.bool.getInvalid(function (error, result) {
+            should.exist(error);
+            should.not.exist(result);
+            done();
+          });
+        });
+      });
+
       it('should put max value for 32 and 64 bit Integers', function (done) {
         testClient.intModel.putMax32((Math.pow(2, 32 - 1) - 1), function (error, result) {
           should.not.exist(error);
@@ -607,6 +726,14 @@ describe('nodejs', function () {
           done();
         });
       });
+
+      it('should put local positive offset max Date', function (done) {
+        testClient.datetime.putLocalPositiveOffsetMaxDateTime('9999-12-31t23:59:59.9999999+14:00', function (error, result) {
+          should.not.exist(error);
+          should.not.exist(result);
+          done();
+        });
+      });
     });
 
     describe('DateTimeRfc1123 Client', function () {
@@ -888,7 +1015,6 @@ describe('nodejs', function () {
           testClient.arrayModel.getDateValid(function (error, result) {
             should.not.exist(error);
             assert.deepEqual(result, testArray);
-            //TODO, 4213536: Fix date serialization
             testClient.arrayModel.putDateValid(testArray, function (error, result) {
               should.not.exist(error);
             testClient.arrayModel.getDateInvalidNull(function (error, result) {
@@ -1656,6 +1782,20 @@ describe('nodejs', function () {
         });
       });
 
+      it('should work when path has date', function (done) {
+        testClient.paths.dateValid(function (error, result) {
+          should.not.exist(error);
+          done();
+        });
+      });
+
+      it('should work when query has date', function (done) {
+        testClient.queries.dateValid(function (error, result) {
+          should.not.exist(error);
+          done();
+        });
+      });
+
       it('should work when path has enum', function (done) {
         testClient.paths.enumValid('', function (error, result) {
           should.exist(error);
@@ -1745,67 +1885,67 @@ describe('nodejs', function () {
         });
       });
       it('should work when query has bool', function (done) {
-        testClient.queries.getBooleanTrue({ boolQuery : true }, function (error, result) {
+        testClient.queries.getBooleanTrue(function (error, result) {
           should.not.exist(error);
-          testClient.queries.getBooleanFalse({ boolQuery : false }, function (error, result) {
+          testClient.queries.getBooleanFalse(function (error, result) {
             should.not.exist(error);
             done();
           });
         });
       });
       it('should work when query has double values', function (done) {
-        testClient.queries.doubleDecimalNegative({ doubleQuery: -9999999.999 }, function (error, result) {
+        testClient.queries.doubleDecimalNegative(function (error, result) {
           should.not.exist(error);
-          testClient.queries.doubleDecimalPositive({ doubleQuery: 9999999.999 }, function (error, result) {
+          testClient.queries.doubleDecimalPositive(function (error, result) {
             should.not.exist(error);
             done();
           });
         });
       });
       it('should work when query has float values', function (done) {
-        testClient.queries.floatScientificNegative({ floatQuery: -1.034e-20 }, function (error, result) {
+        testClient.queries.floatScientificNegative(function (error, result) {
           should.not.exist(error);
-          testClient.queries.floatScientificPositive({ floatQuery: 1.034e20 }, function (error, result) {
+          testClient.queries.floatScientificPositive(function (error, result) {
             should.not.exist(error);
             done();
           });
         });
       });
       it('should work when query has int values', function (done) {
-        testClient.queries.getIntNegativeOneMillion({ intQuery: -1000000 }, function (error, result) {
+        testClient.queries.getIntNegativeOneMillion(function (error, result) {
           should.not.exist(error);
-          testClient.queries.getIntOneMillion({ intQuery: 1000000 }, function (error, result) {
+          testClient.queries.getIntOneMillion(function (error, result) {
             should.not.exist(error);
             done();
           });
         });
       });
       it('should work when query has billion values', function (done) {
-        testClient.queries.getNegativeTenBillion({ longQuery: -10000000000 }, function (error, result) {
+        testClient.queries.getNegativeTenBillion(function (error, result) {
           should.not.exist(error);
-          testClient.queries.getTenBillion({ longQuery: 10000000000 }, function (error, result) {
+          testClient.queries.getTenBillion(function (error, result) {
             should.not.exist(error);
             done();
           });
         });
       });
       it('should work when query has string values', function (done) {
-        testClient.queries.stringEmpty({ stringQuery: '' }, function (error, result) {
+        testClient.queries.stringEmpty(function (error, result) {
           should.not.exist(error);
-          testClient.queries.stringUrlEncoded({ stringQuery: 'begin!*\'();:@ &=+$,/?#[]end' }, function (error, result) {
+          testClient.queries.stringUrlEncoded(function (error, result) {
             should.not.exist(error);
             done();
           });
         });
       });
       it('should work when query has datetime', function (done) {
-        testClient.queries.dateTimeValid({ dateTimeQuery: new Date('2012-01-01T01:01:01Z') }, function (error, result) {
+        testClient.queries.dateTimeValid(function (error, result) {
           should.not.exist(error);
           done();
         });
       });
       it('should work when query has byte values', function (done) {
-        testClient.queries.byteEmpty({ byteQuery: new Buffer('') }, function (error, result) {
+        testClient.queries.byteEmpty(function (error, result) {
           should.not.exist(error);
           testClient.queries.byteMultiByte({ byteQuery: new Buffer('啊齄丂狛狜隣郎隣兀﨩') }, function (error, result) {
             should.not.exist(error);

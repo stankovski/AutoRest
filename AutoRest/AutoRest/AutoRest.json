@@ -23,11 +23,20 @@
     },
     "Azure.Java": {
       "type": "AzureJavaCodeGenerator, AutoRest.Generator.Azure.Java"
+    },
+    "Python": {
+      "type": "PythonCodeGenerator, AutoRest.Generator.Python"
+    },
+    "Azure.Python": {
+      "type": "AzurePythonCodeGenerator, AutoRest.Generator.Azure.Python"
     }
   },
   "modelers": {
     "Swagger": {
       "type": "SwaggerModeler, AutoRest.Modeler.Swagger"
+    },
+    "CompositeSwagger": {
+      "type": "CompositeSwaggerModeler, AutoRest.Modeler.CompositeSwagger"
     }
   }
 }

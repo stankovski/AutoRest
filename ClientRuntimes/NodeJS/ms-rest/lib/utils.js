@@ -15,20 +15,6 @@ exports.urlIsHTTPS = function (urlToCheck) {
 };
 
 /**
-* Provides the version of nodejs on the system.
-*
-* @return {object} An object specifying the major, minor and patch version of nodejs on the system.
-*/
-exports.getNodeVersion = function () {
-  var parsedVersion = process.version.split('.');
-  return {
-    major: parseInt(parsedVersion[0].substr(1), 10),
-    minor: parseInt(parsedVersion[1], 10),
-    patch: parseInt(parsedVersion[2], 10)
-  };
-};
-
-/**
 * Checks if a value is null or undefined.
 *
 * @param {object} value The value to check for null or undefined.
@@ -83,6 +69,8 @@ exports.stripRequest = function (request) {
     strippedRequest = JSON.parse(JSON.stringify(request));
     if (strippedRequest.headers && strippedRequest.headers.Authorization) {
       delete strippedRequest.headers.Authorization;
+    } else if (strippedRequest.headers && strippedRequest.headers.authorization) {
+      delete strippedRequest.headers.authorization;
     }
   } catch (err) {
     var errMsg = err.message;

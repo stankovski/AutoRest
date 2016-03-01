@@ -60,8 +60,11 @@ namespace Microsoft.Rest.Modeler.Swagger
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         public override ServiceClient Build()
         {
-            PrimaryType.Reset();
             Logger.LogInfo(Resources.ParsingSwagger);
+            if (string.IsNullOrWhiteSpace(Settings.Input))
+            {
+                throw ErrorManager.CreateError("Input parameter is required.");
+            }
             ServiceDefinition = SwaggerParser.Load(Settings.Input, Settings.FileSystem);
             Logger.LogInfo(Resources.GeneratingClient);
             // Update settings
@@ -191,17 +194,9 @@ namespace Microsoft.Rest.Modeler.Swagger
             ServiceClient.BaseUrl = string.Format(CultureInfo.InvariantCulture, "{0}://{1}{2}",
                 ServiceDefinition.Schemes[0].ToString().ToLower(CultureInfo.InvariantCulture),
                 ServiceDefinition.Host, ServiceDefinition.BasePath);
-        }
 
-        /// <summary>
-        /// Create the BaseURi for a method from metadata
-        /// </summary>
-        /// <param name="serviceClient">The service client that will contain the method </param>
-        /// <param name="path">The relative path for this operation</param>
-        /// <returns>A string representing the full http (parameterized) path for the operation</returns>
-        public virtual string BuildMethodBaseUrl(ServiceClient serviceClient, string path)
-        {
-            return string.Format(CultureInfo.InvariantCulture, "{{{0}}}{1}", BaseUriParameterName, path);
+            // Copy extensions
+            ServiceDefinition.Extensions.ForEach(extention => ServiceClient.Extensions.Add(extention.Key, extention.Value));
         }
 
         /// <summary>

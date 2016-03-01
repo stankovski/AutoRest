@@ -28,7 +28,7 @@ namespace Microsoft.Rest.Generator.ClientModel
         /// <summary>
         /// Gets or sets the list of CompositeType properties.
         /// </summary>
-        public IList<Property> Properties { get; private set; }
+        public List<Property> Properties { get; private set; }
 
         /// <summary>
         /// Gets the union of Parent and current type properties
@@ -62,6 +62,12 @@ namespace Microsoft.Rest.Generator.ClientModel
         public string Documentation { get; set; }
 
         /// <summary>
+        /// Returns true if any of the properties is a Constant or is 
+        /// a CompositeType which ContainsConstantProperties set to true.
+        /// </summary>
+        public bool ContainsConstantProperties { get; set; }
+
+        /// <summary>
         /// Gets a dictionary of x-vendor extensions defined for the CompositeType.
         /// </summary>
         public Dictionary<string, object> Extensions { get; private set; }
@@ -69,7 +75,7 @@ namespace Microsoft.Rest.Generator.ClientModel
         /// <summary>
         /// Gets the union of Parent and current type properties
         /// </summary>
-        public IDictionary<string, object> ComposedExtensions
+        public Dictionary<string, object> ComposedExtensions
         {
             get
             {

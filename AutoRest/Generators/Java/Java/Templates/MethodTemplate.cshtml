@@ -42,48 +42,19 @@ public @Model.OperationResponseReturnTypeString @(Model.Name)(@Model.MethodParam
 {
 @:    Validator.validate(@(param.Name));
 }
-@foreach (var group in Model.InputParameterTransformation.Select(t => t.ParameterMappings[0].InputParameter).Distinct())
+
+    @Model.BuildInputMappings()
+
+@if (Model.ServiceClient.Extensions.ContainsKey(Microsoft.Rest.Generator.Extensions.ParameterizedHostExtension))
 {
-    var inParam = group.Name;
-if (!group.IsRequired)
+foreach (var param in Model.Parameters.Where(p => p.Extensions.ContainsKey("hostParameter")))
 {
-foreach (var outProp in Model.InputParameterTransformation.Where(t => t.ParameterMappings[0].InputParameter == group).Select(t => t.OutputParameter))
-{
-if (outProp.IsRequired && JavaCodeNamer.JavaBuiltInTypes.Contains(outProp.Type.Name))
-{
-@:    @outProp.Type.Name @outProp.Name;
-}
-else
-{
-@:    @JavaCodeNamer.WrapPrimitiveType(outProp.Type).Name @outProp.Name = null;
+@:    @(Model.ClientReference).getBaseUrl().set("{@(param.SerializedName)}", @param.Name);
 }
 }
-@:    if (@(group.Name) != null) {
-    foreach (var transformation in Model.InputParameterTransformation.Where(t => t.ParameterMappings[0].InputParameter.Name == inParam))
-    {
-        var outProp = transformation.OutputParameter.Name;
-        var inProp = transformation.ParameterMappings[0].InputParameterProperty;
-@:        @outProp = @(inParam).get@(inProp.ToPascalCase())();
-    }
-@:    }
-}
-else
-{
-foreach (var transformation in Model.InputParameterTransformation.Where(t => t.ParameterMappings[0].InputParameter.Name == inParam))
-{
-    var outType = transformation.OutputParameter.Type.Name;
-    if (!transformation.OutputParameter.IsRequired)
-    {
-        outType = JavaCodeNamer.WrapPrimitiveType(transformation.OutputParameter.Type).Name;
-    }
-    var outProp = transformation.OutputParameter.Name;
-    var inProp = transformation.ParameterMappings[0].InputParameterProperty;
-@:    @outType @outProp = @(inParam).get@(inProp.ToPascalCase())();
-}
-}
-}
-    Call<@Model.CallType> call = service.@(Model.Name)(@Model.MethodParameterInvocation);
-    return @(Model.Name)Delegate(call.execute(), null);
+    Call<@Model.CallType> call = service.@(Model.Name)(@Model.MethodParameterApiInvocation);
+    @Model.ResponseGeneration
+    return @Model.ReturnValue;
 }
 @EmptyLine
 /**
@@ -100,10 +71,14 @@ foreach (var transformation in Model.InputParameterTransformation.Where(t => t.P
 {
 @: * @@param @param.Name @((param.Documentation ?? "the " + param.Type.ToString() + " value").EscapeXmlComment())
 }
- * @@param serviceCallback the async ServiceCallback to handle successful and failed responses.
+@Model.CallbackDocumentation
+ * @@throws IllegalArgumentException thrown if callback is null
  * @@return the {@@link Call} object
  */
-public Call<@Model.CallType> @(Model.Name)Async(@Model.MethodParameterDeclarationWithCallback) {
+public ServiceCall @(Model.Name)Async(@Model.MethodParameterDeclarationWithCallback) throws IllegalArgumentException {
+    if (serviceCallback == null) {
+        throw new IllegalArgumentException("ServiceCallback is required for async calls.");
+    }
 @foreach (var param in Model.RequiredNullableParameters)
 {
 @:    if (@param.Name == null) {
@@ -115,66 +90,37 @@ public Call<@Model.CallType> @(Model.Name)Async(@Model.MethodParameterDeclaratio
 {
 @:    Validator.validate(@(param.Name), serviceCallback);
 }
-@foreach (var group in Model.InputParameterTransformation.Select(t => t.ParameterMappings[0].InputParameter).Distinct())
+
+    @Model.BuildInputMappings()
+
+@if (Model.ServiceClient.Extensions.ContainsKey(Microsoft.Rest.Generator.Extensions.ParameterizedHostExtension))
 {
-    var inParam = group.Name;
-if (!group.IsRequired)
+foreach (var param in Model.Parameters.Where(p => p.Extensions.ContainsKey("hostParameter")))
 {
-foreach (var outProp in Model.InputParameterTransformation.Where(t => t.ParameterMappings[0].InputParameter == group).Select(t => t.OutputParameter))
-{
-if (outProp.IsRequired && JavaCodeNamer.JavaBuiltInTypes.Contains(outProp.Type.Name))
-{
-@:    @outProp.Type.Name @outProp.Name;
-}
-else
-{
-@:    @JavaCodeNamer.WrapPrimitiveType(outProp.Type).Name @outProp.Name = null;
+@:    @(Model.ClientReference).getBaseUrl().set("{@(param.SerializedName)}", @param.Name);
 }
 }
-@:    if (@(group.Name) != null) {
-    foreach (var transformation in Model.InputParameterTransformation.Where(t => t.ParameterMappings[0].InputParameter.Name == inParam))
-    {
-        var outProp = transformation.OutputParameter.Name;
-        var inProp = transformation.ParameterMappings[0].InputParameterProperty;
-@:        @outProp = @(inParam).get@(inProp.ToPascalCase())();
-    }
-@:    }
-}
-else
-{
-foreach (var transformation in Model.InputParameterTransformation.Where(t => t.ParameterMappings[0].InputParameter.Name == inParam))
-{
-    var outType = transformation.OutputParameter.Type.Name;
-    if (!transformation.OutputParameter.IsRequired)
-    {
-        outType = JavaCodeNamer.WrapPrimitiveType(transformation.OutputParameter.Type).Name;
-    }
-    var outProp = transformation.OutputParameter.Name;
-    var inProp = transformation.ParameterMappings[0].InputParameterProperty;
-@:    @outType @outProp = @(inParam).get@(inProp.ToPascalCase())();
-}
-}
-}
-    Call<@Model.CallType> call = service.@(Model.Name)(@Model.MethodParameterInvocation);
+    Call<@Model.CallType> call = service.@(Model.Name)(@Model.MethodParameterApiInvocation);
+    @Model.ServiceCallConstruction
     call.enqueue(new @Model.InternalCallback<@(JavaCodeNamer.WrapPrimitiveType(Model.ReturnType.Body).Name)>(serviceCallback) {
         @@Override
-        public void onResponse(Response<@Model.CallType> response, Retrofit retrofit) {
+        public void onResponse(Call<@Model.CallType> call, Response<@Model.CallType> response) {
             try {
-                serviceCallback.success(@(Model.Name)Delegate(response, retrofit));
+                @Model.SuccessCallback
             } catch (@Model.OperationExceptionTypeString | IOException exception) {
                 serviceCallback.failure(exception);
             }
         }
     });
-    return call;
+    return serviceCall;
 }
 @EmptyLine
-private @Model.OperationResponseReturnTypeString @(Model.Name)Delegate(Response<@Model.CallType> response, Retrofit retrofit) throws @Model.ExceptionString {
-    return new @Model.ResponseBuilder<@Model.GenericReturnTypeString, @Model.OperationExceptionTypeString>()
+private @Model.DelegateOperationResponseReturnTypeString @(Model.Name)Delegate(Response<@Model.CallType> response) throws @Model.ExceptionString {
+    return new @Model.ResponseBuilder<@Model.DelegateReturnTypeString, @Model.OperationExceptionTypeString>(@(Model.ClientReference).getMapperAdapter())
 @foreach (var response in Model.Responses)
 {
 
-            @:.register(@((int)response.Key), new TypeToken<@JavaCodeNamer.WrapPrimitiveType(response.Value.Body).Name>() { }.getType())
+            @:.register(@((int)response.Key), new TypeToken<@Model.TypeTokenType(response.Value.Body)>() { }.getType())
 }
 @if (Model.DefaultResponse.Body != null)
 {
@@ -184,22 +130,22 @@ private @Model.OperationResponseReturnTypeString @(Model.Name)Delegate(Response<
 {
     if (Model.ReturnType.Headers != null)
     {
-            @:.buildEmptyWithHeaders(response, retrofit, @(Model.ReturnType.Headers.Name).class);
+            @:.buildEmptyWithHeaders(response, @(Model.ReturnType.Headers.Name).class);
     }
     else
     {
-            @:.buildEmpty(response, retrofit);
+            @:.buildEmpty(response);
     }
 }
 else
 {
     if (Model.ReturnType.Headers != null)
     {
-            @:.buildWithHeaders(response, retrofit, @(Model.ReturnType.Headers.Name).class);
+            @:.buildWithHeaders(response, @(Model.ReturnType.Headers.Name).class);
     }
     else
     {
-            @:.build(response, retrofit);
+            @:.build(response);
     }
 }
 }
