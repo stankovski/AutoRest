@@ -2,6 +2,6 @@ build:
   image: azuresdk/ci-autorest
   commands:
     - bash -c "source $DNX_USER_HOME/dnvm/dnvm.sh \
-      && dnvm install $DNX_VERSION -r mono"
+      && dnvm install $DNX_VERSION -r mono -p"
     - npm install
     - gulp
