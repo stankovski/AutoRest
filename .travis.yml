@@ -2,8 +2,6 @@ language: csharp
 sudo: false
 mono:
 - beta
-os:
-- linux
 addons:
   apt:
     packages:
